@@ -1,0 +1,1 @@
+export { educationContent } from './education';

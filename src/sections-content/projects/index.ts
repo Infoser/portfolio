@@ -1,0 +1,1 @@
+export { projectsContent } from './projects';
