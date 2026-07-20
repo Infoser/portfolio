@@ -1,8 +1,7 @@
-﻿{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+{
   "rewrites": [
     { "source": "/__admin__/:slug", "destination": "/api/admin-gate" },
-    { "source": "/api/admin-gate",   "destination": "/api/admin-gate" },
-    { "source": "/((?!__admin__).*)", "destination": "/index.html" }
+    { "source": "/api/admin-gate", "destination": "/api/admin-gate" },
+    { "source": "/((?!__admin__|api/).*)", "destination": "/index.html" }
   ]
 }
