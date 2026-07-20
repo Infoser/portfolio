@@ -94,7 +94,7 @@ function App() {
             />
           <Route path="/playground" element={<Playground />} />
           <Route
-            path="/__admin__/*"
+            path="/__admin__"
             element={
               <Suspense
                 fallback={

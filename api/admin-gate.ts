@@ -1,10 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 
 const ADMIN_SLUG = process.env.ADMIN_SLUG ?? '';
-const SIZE_LIMIT = 4 * 1024 * 1024;
 
 const handler = async (req: VercelRequest, res: VercelResponse) => {
   if (req.method !== 'GET') {
@@ -32,25 +28,29 @@ const handler = async (req: VercelRequest, res: VercelResponse) => {
     return;
   }
 
-  let html: string;
+  const adminPath = '/__admin__';
+  const bootstrap = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opening admin…</title>
+</head>
+<body>
+<script>
+(function () {
   try {
-    const here = dirname(fileURLToPath(import.meta.url));
-    const publicDir = resolve(here, '..', 'public');
-    html = readFileSync(resolve(publicDir, 'index.html'), 'utf8');
-  } catch {
-    res.status(500).setHeader('Content-Type', 'text/plain').send('Admin shell not available.');
-    return;
-  }
-
-  if (html.length > SIZE_LIMIT) {
-    res.status(500).setHeader('Content-Type', 'text/plain').send('Admin shell too large.');
-    return;
-  }
-
-  const injected = html.replace(
-    '</head>',
-    `<script>window.__ADMIN__ = 1; window.__ADMIN_SLUG__ = ${JSON.stringify(slug)};</script>\n</head>`,
-  );
+    sessionStorage.setItem('__ADMIN__', '1');
+  } catch (e) {}
+  window.location.replace(${JSON.stringify(adminPath)});
+})();
+</script>
+<noscript>
+  <meta http-equiv="refresh" content="0; url=${adminPath}" />
+  <a href="${adminPath}">Continue to admin</a>.
+</noscript>
+</body>
+</html>`;
 
   res
     .setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -58,7 +58,7 @@ const handler = async (req: VercelRequest, res: VercelResponse) => {
     .setHeader('X-Content-Type-Options', 'nosniff')
     .setHeader('Referrer-Policy', 'no-referrer')
     .status(200)
-    .send(injected);
+    .send(bootstrap);
 };
 
 function timingSafeEqual(a: string, b: string): boolean {
