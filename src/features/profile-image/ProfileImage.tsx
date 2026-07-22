@@ -4,26 +4,50 @@ type ProfileImageProps = {
   className?: string;
 };
 
+/**
+ * Polaroid stack frame (adapted from Uiverse.io by janisar-hyder).
+ * Three paper layers sit behind a square photo — on hover the stack
+ * fans out (5deg stack tilt, -4deg/+4deg inner layers). The photo
+ * itself is grayscale at rest, full colour on hover.
+ */
 export function ProfileImage({ src, alt, className }: ProfileImageProps) {
   return (
     <figure
       className={
-        'group relative mx-auto block w-32 shrink-0 overflow-hidden rounded-lg border border-border bg-surface shadow-sm sm:w-44 md:w-56 md:sticky md:top-6 ' +
+        'group relative mx-auto w-44 max-w-[400px] shrink-0 transition-transform duration-200 ease-out hover:rotate-[5deg] sm:w-52 md:sticky md:top-6 md:w-60 ' +
         (className ?? '')
       }
     >
-      <img
-        src={src}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        className="block h-auto w-full object-contain grayscale transition-[filter] duration-500 ease-out group-hover:grayscale-0 group-focus-within:grayscale-0"
-      />
-      <figcaption className="sr-only">{alt}</figcaption>
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border/40 transition-opacity duration-500 group-hover:opacity-0"
-      />
+      {/* Polaroid card — paper background, square image, slim caption strip */}
+      <div
+        className="group/card relative aspect-square cursor-pointer border-4 border-foreground bg-surface p-[5%] transition-transform duration-150 ease-out"
+      >
+        {/* Two rotated paper layers behind the card */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 block border-4 border-foreground bg-surface transition-transform duration-150 ease-out group-hover/card:-translate-y-[2%] group-hover/card:-rotate-[4deg]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 block border-4 border-foreground bg-surface transition-transform duration-150 ease-out group-hover/card:translate-y-[2%] group-hover/card:rotate-[4deg]"
+        />
+
+        {/* The photo itself: square, grayscale until hover */}
+        <div className="relative aspect-square w-full overflow-hidden border-4 border-foreground bg-muted">
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            className="block h-full w-full object-cover grayscale transition-[filter] duration-500 ease-out group-hover/card:grayscale-0"
+          />
+        </div>
+
+        {/* Caption strip — small caption inside the square's bottom space */}
+        <figcaption className="absolute inset-x-[5%] bottom-[5%] text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+          {alt}
+        </figcaption>
+      </div>
     </figure>
   );
 }
