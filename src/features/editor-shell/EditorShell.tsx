@@ -20,8 +20,8 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
       <TitleBar onOpenMenu={() => setDrawerOpen(true)} />
-      <div className="relative flex min-h-0 flex-1 flex-col md:flex-row">
-        {/* Mobile drawer trigger — overlays above the activity rail */}
+      <div className="relative flex min-h-0 flex-1">
+        {/* Mobile drawer trigger — overlays top-left */}
         <div className="pointer-events-none absolute left-2 top-1 z-30 md:hidden">
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
             <SheetTrigger asChild>
@@ -47,7 +47,10 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
           </Sheet>
         </div>
 
-        <ActivityBar />
+        {/* ActivityBar — desktop only (mobile uses the Browse drawer above) */}
+        <div className="hidden md:block">
+          <ActivityBar />
+        </div>
 
         {/* Explorer — desktop */}
         <aside
