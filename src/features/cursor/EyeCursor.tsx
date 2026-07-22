@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { EYE_CURSOR_DEFAULTS } from './config';
 import { EyeCursorSprite } from './EyeCursorSprite';
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion';
 
 type CursorState = {
   x: number;
@@ -21,14 +20,13 @@ const isTouchDevice = () =>
   ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
 export function EyeCursor() {
-  const reducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const cursorLayerRef = useRef<HTMLDivElement>(null);
   const eyesRef = useRef<SVGGElement>(null);
   const blinkGRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (reducedMotion || isTouchDevice()) return;
+    if (isTouchDevice()) return;
 
     const state: CursorState = {
       x: window.innerWidth / 2,
@@ -105,9 +103,9 @@ export function EyeCursor() {
       window.removeEventListener('pointermove', onMove);
       document.body.style.cursor = '';
     };
-  }, [reducedMotion]);
+  }, []);
 
-  if (reducedMotion || isTouchDevice()) return null;
+  if (isTouchDevice()) return null;
 
   return (
     <div
@@ -119,7 +117,6 @@ export function EyeCursor() {
         left: 0,
         pointerEvents: 'none',
         zIndex: 2147483647,
-        mixBlendMode: 'difference',
       }}
     >
       <div ref={cursorLayerRef} style={{ position: 'absolute', top: 0, left: 0 }}>

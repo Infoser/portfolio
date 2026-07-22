@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { AppProviders } from '@/app/AppProviders';
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion';
 import { EyeCursor } from '@/features/cursor';
 import { EditorShell } from '@/features/editor-shell';
 import { SectionRenderer } from '@/features/section';
@@ -62,7 +61,6 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
 const renderSection = (key: SectionKey) => <SectionView sectionKey={key} />;
 
 function App() {
-  const reducedMotion = useReducedMotion();
   const open = useTabsStore((s) => s.open);
 
   useEffect(() => {
@@ -72,11 +70,9 @@ function App() {
   return (
     <AppProviders>
       <Helmet defaultTitle="Ishan Kumar Sahu — ML/DL researcher" titleTemplate="%s · portfolio" />
-      {!reducedMotion && (
-        <Suspense fallback={null}>
-          <ParticleField />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <ParticleField />
+      </Suspense>
       <div className="relative z-10">
         <EyeCursor />
         <DebugTerminal />

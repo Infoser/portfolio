@@ -5,6 +5,7 @@ import { ActivityBar } from './ActivityBar';
 import { Explorer } from './Explorer';
 import { TabStrip } from './TabStrip';
 import { EditorArea } from './EditorArea';
+import { TitleBar } from './TitleBar';
 import { StatusBar } from './StatusBar';
 
 type EditorShellProps = {
@@ -18,6 +19,7 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
+      <TitleBar onOpenMenu={() => setDrawerOpen(true)} />
       <div className="relative flex min-h-0 flex-1">
         <ActivityBar />
 
@@ -67,4 +69,4 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
   );
 }
 
-export { ActivityBar, Explorer, TabStrip, EditorArea, StatusBar };
+export { ActivityBar, Explorer, TabStrip, EditorArea, TitleBar, StatusBar };

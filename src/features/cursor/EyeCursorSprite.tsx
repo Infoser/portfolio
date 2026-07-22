@@ -35,6 +35,20 @@ export const EyeCursorSprite = memo(function EyeCursorSprite({ color, eyesRef, b
         shapeRendering="crispEdges"
         aria-hidden="true"
       >
+        {}
+
+        <g fill="#ffffff">
+          {ARROW_PIXELS.map(([x, y], i) => {
+            const neighbors = new Set(ARROW_PIXELS.map(([nx, ny]) => `${nx},${ny}`));
+            const isEdge = [
+              [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1],
+            ].some(([nx, ny]) => !neighbors.has(`${nx},${ny}`));
+            return isEdge
+              ? <rect key={`o-${i}`} x={x * PIXEL} y={y * PIXEL} width={PIXEL} height={PIXEL} />
+              : null;
+          })}
+        </g>
+
         <g fill={color}>
           {ARROW_PIXELS.map(([x, y], i) => (
             <rect key={`a-${i}`} x={x * PIXEL} y={y * PIXEL} width={PIXEL} height={PIXEL} />

@@ -104,8 +104,8 @@
   --code-bg: oklch(96% 0.008 240);
   --code-foreground: oklch(28% 0.02 240);
 
-  --status-bar: oklch(95% 0.008 240);
-  --status-bar-foreground: oklch(35% 0.02 240);
+  --status-bar: var(--primary);
+  --status-bar-foreground: var(--primary-foreground);
 }
 
 .dark {
@@ -139,8 +139,9 @@
   --code-bg: oklch(20% 0.018 240);
   --code-foreground: oklch(88% 0.01 240);
 
-  --status-bar: oklch(20% 0.018 240);
-  --status-bar-foreground: oklch(64% 0.02 240);
+  --status-bar: var(--primary);
+  --status-bar-foreground: var(--primary-foreground);
+  --status-bar-muted: oklch(96% 0.01 240);
 }
 
 @layer base {

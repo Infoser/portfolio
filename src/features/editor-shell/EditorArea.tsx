@@ -10,6 +10,22 @@ type EditorAreaProps = {
   placeholder?: ReactNode;
 };
 
+const GUTTER_LINES = 60;
+
+function Gutter() {
+  return (
+    <div
+      aria-hidden="true"
+      className="sticky top-0 shrink-0 select-none self-start bg-surface/40 pl-3 pr-2 pt-6 font-mono text-[11px] leading-6 text-muted-foreground/30 [user-select:none]"
+      style={{ minHeight: '100%' }}
+    >
+      {Array.from({ length: GUTTER_LINES }, (_, i) => (
+        <div key={i}>{i + 1}</div>
+      ))}
+    </div>
+  );
+}
+
 export function EditorArea({ children, placeholder }: EditorAreaProps) {
   const activeTab = useTabsStore((s) => s.activeTab);
 
@@ -23,9 +39,12 @@ export function EditorArea({ children, placeholder }: EditorAreaProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="h-full min-h-0 overflow-y-auto px-6 py-6"
+            className="flex h-full min-h-0 overflow-y-auto"
           >
-            {children ? children(activeTab) : <DefaultPlaceholder sectionKey={activeTab} />}
+            <Gutter />
+            <div className="flex-1 min-w-0 px-6 py-6">
+              {children ? children(activeTab) : <DefaultPlaceholder sectionKey={activeTab} />}
+            </div>
           </motion.div>
         ) : (
           <motion.div

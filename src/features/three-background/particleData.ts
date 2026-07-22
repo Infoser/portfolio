@@ -9,9 +9,9 @@ export const IDLE_DRIFT_SPEED = 0.3;
 export type ParticleKind = 'primary' | 'accent' | 'research';
 
 const KIND_COLORS: Record<ParticleKind, THREE.Color> = {
-  primary: new THREE.Color('oklch(0.72 0.13 180)'),
-  accent: new THREE.Color('oklch(0.78 0.13 70)'),
-  research: new THREE.Color('oklch(0.70 0.22 345)'),
+  primary: new THREE.Color('#06bfa8'),
+  accent: new THREE.Color('#eca851'),
+  research: new THREE.Color('#f757bd'),
 };
 
 const KIND_KEYS = Object.keys(KIND_COLORS) as ParticleKind[];
