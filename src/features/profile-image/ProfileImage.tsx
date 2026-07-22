@@ -12,13 +12,13 @@ export function ProfileImage({ src, alt, className }: ProfileImageProps) {
         (className ?? '')
       }
     >
-      <div className="aspect-[4/5] overflow-hidden">
+      <div className="overflow-hidden">
         <img
           src={src}
           alt={alt}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover grayscale transition-[filter] duration-500 ease-out group-hover:grayscale-0 group-focus-within:grayscale-0"
+          className="h-auto w-full object-contain grayscale transition-[filter] duration-500 ease-out group-hover:grayscale-0 group-focus-within:grayscale-0"
         />
       </div>
       <figcaption className="sr-only">{alt}</figcaption>
