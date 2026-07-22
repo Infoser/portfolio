@@ -2,8 +2,8 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { AppProviders } from '@/app/AppProviders';
-import { EyeCursor } from '@/features/cursor';
 import { EditorShell } from '@/features/editor-shell';
+import { ProfileImage } from '@/features/profile-image';
 import { SectionRenderer } from '@/features/section';
 import { SECTIONS_MANIFEST, type SectionKey } from '@/config/sections-manifest';
 import { useTabsStore } from '@/store/tabs';
@@ -24,9 +24,16 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
   const entry = SECTIONS_MANIFEST[sectionKey];
   const { content, isLoading, isLive } = useSection(sectionKey);
   const pageTitle = `${entry.label} — Ishan Kumar Sahu`;
+  const isAbout = sectionKey === 'about';
 
   return (
-    <article className="flex max-w-3xl flex-col gap-6">
+    <article
+      className={
+        isAbout
+          ? 'flex max-w-3xl flex-col gap-6 md:max-w-4xl md:flex-row md:items-start md:gap-8'
+          : 'flex max-w-3xl flex-col gap-6'
+      }
+    >
       <Helmet>
         <title>{pageTitle}</title>
         <meta
@@ -34,25 +41,31 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
           content={`${entry.label} — section of Ishan Kumar Sahu's portfolio.${entry.extension === 'md' ? '' : ' Read as a ' + entry.extension + ' file.'}`}
         />
       </Helmet>
-      <header className="flex flex-col gap-1">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          {entry.label.toLowerCase()}.{entry.extension}
-          {isSupabaseConfigured() && (
-            <span className="ml-2 normal-case tracking-normal text-muted-foreground/70">
-              {isLoading ? '· loading live' : isLive ? '· live' : '· using bundled'}
-            </span>
-          )}
-        </p>
-        <h2 className="font-display text-3xl font-medium tracking-tight">{entry.label}</h2>
-      </header>
+      <div className={isAbout ? 'min-w-0 flex-1' : 'contents'}>
+        <header className="flex flex-col gap-1">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            {entry.label.toLowerCase()}.{entry.extension}
+            {isSupabaseConfigured() && (
+              <span className="ml-2 normal-case tracking-normal text-muted-foreground/70">
+                {isLoading ? '· loading live' : isLive ? '· live' : '· using bundled'}
+              </span>
+            )}
+          </p>
+          <h2 className="font-display text-3xl font-medium tracking-tight">{entry.label}</h2>
+        </header>
 
-      {content ? (
-        <SectionRenderer sectionKey={sectionKey} content={content} />
-      ) : (
-        <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          Content for <span className="font-mono text-primary">{entry.label}</span> will appear
-          here once you upload it via the admin panel post-deploy.
-        </div>
+        {content ? (
+          <SectionRenderer sectionKey={sectionKey} content={content} />
+        ) : (
+          <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+            Content for <span className="font-mono text-primary">{entry.label}</span> will appear
+            here once you upload it via the admin panel post-deploy.
+          </div>
+        )}
+      </div>
+
+      {isAbout && (
+        <ProfileImage src="/profile.png" alt="Ishan Kumar Sahu" />
       )}
     </article>
   );
@@ -74,7 +87,6 @@ function App() {
         <ParticleField />
       </Suspense>
       <div className="relative z-10">
-        <EyeCursor />
         <DebugTerminal />
         <BrowserRouter>
           <Routes>
