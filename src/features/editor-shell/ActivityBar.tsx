@@ -17,7 +17,7 @@ const RailIcon = ({ Icon, active, onClick, label }: {
     aria-current={active ? 'page' : undefined}
     title={label}
     className={cn(
-      'relative flex size-11 items-center justify-center rounded-md transition-colors',
+      'relative flex size-11 shrink-0 items-center justify-center rounded-md transition-colors',
       active
         ? 'text-foreground'
         : 'text-muted-foreground hover:text-foreground hover:bg-muted',
@@ -42,14 +42,14 @@ export function ActivityBar() {
   return (
     <aside
       aria-label="Section navigation"
-      className="flex h-full w-14 flex-col items-center gap-1 border-r border-border bg-surface py-3"
+      className="flex h-full w-14 shrink-0 flex-row items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-surface px-1 py-2 no-scrollbar md:flex-col md:overflow-x-visible md:overflow-y-auto md:border-b-0 md:border-r md:py-3 md:px-0"
     >
       {SECTION_KEYS.map((key) => {
         const entry = SECTIONS_MANIFEST[key];
         const folderContainsActive =
           activeTab != null &&
           entry.isFolder === true &&
-          (entry.children as ReadonlyArray<string>).includes(activeTab);
+          activeTab === key;
 
         return (
           <RailIcon

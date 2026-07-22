@@ -20,28 +20,18 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
       <TitleBar onOpenMenu={() => setDrawerOpen(true)} />
-      <div className="relative flex min-h-0 flex-1">
-        <ActivityBar />
-
-        {/* Explorer — desktop */}
-        <aside
-          aria-label="File tree"
-          className="hidden w-56 shrink-0 border-r border-border bg-surface md:block"
-        >
-          <Explorer />
-        </aside>
-
-        {/* Explorer — mobile drawer */}
-        <div className="absolute left-16 top-2 z-30 md:hidden">
+      <div className="relative flex min-h-0 flex-1 flex-col md:flex-row">
+        {/* Mobile drawer trigger — overlays above the activity rail */}
+        <div className="pointer-events-none absolute left-2 top-1 z-30 md:hidden">
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
                 aria-label="Browse sections"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-mono text-xs"
+                className="pointer-events-auto inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-mono text-xs"
               >
                 <Menu className="size-3.5" />
-                Browse Sections
+                Browse
               </button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
@@ -56,6 +46,16 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
             </SheetContent>
           </Sheet>
         </div>
+
+        <ActivityBar />
+
+        {/* Explorer — desktop */}
+        <aside
+          aria-label="File tree"
+          className="hidden w-56 shrink-0 border-r border-border bg-surface md:block"
+        >
+          <Explorer />
+        </aside>
 
         {/* Main pane */}
         <main className="flex min-w-0 flex-1 flex-col">

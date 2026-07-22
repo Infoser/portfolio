@@ -41,7 +41,7 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
           content={`${entry.label} — section of Ishan Kumar Sahu's portfolio.${entry.extension === 'md' ? '' : ' Read as a ' + entry.extension + ' file.'}`}
         />
       </Helmet>
-      <div className={isAbout ? 'min-w-0 flex-1' : 'contents'}>
+      <div className={isAbout ? 'min-w-0 flex-1 md:order-1' : 'contents'}>
         <header className="flex flex-col gap-1">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
             {entry.label.toLowerCase()}.{entry.extension}
@@ -65,7 +65,9 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
       </div>
 
       {isAbout && (
-        <ProfileImage src="/profile.png" alt="Ishan Kumar Sahu" />
+        <div className="mb-2 flex justify-center md:order-2 md:mb-0 md:justify-start">
+          <ProfileImage src="/profile.png" alt="Ishan Kumar Sahu" />
+        </div>
       )}
     </article>
   );

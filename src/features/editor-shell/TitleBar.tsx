@@ -46,10 +46,10 @@ export function TitleBar({ onOpenMenu }: TitleBarProps) {
       </div>
 
       {/* Center: filename + brand */}
-      <div className="pointer-events-none flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="pointer-events-none flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden px-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         <span className="hidden md:inline">ishan-portfolio</span>
         <span aria-hidden className="hidden md:inline text-muted-foreground/40">—</span>
-        <span className="text-foreground/80 normal-case tracking-normal">{fileName}</span>
+        <span className="truncate text-foreground/80 normal-case tracking-normal">{fileName}</span>
       </div>
 
       {/* Right: pixel-art brand block */}

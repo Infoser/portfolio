@@ -22,7 +22,7 @@ export type SectionKey =
 
 export type SectionKind = 'markdown' | 'json' | 'toml' | 'structured-list';
 
-export type FolderKey = 'projects' | 'experience';
+export type FolderKey = 'projects' | 'experience' | 'achievements' | 'education' | 'leadership';
 
 export type ManifestEntry = {
   key: SectionKey;
@@ -31,6 +31,13 @@ export type ManifestEntry = {
   icon: LucideIcon;
   isFolder: boolean;
   kind: SectionKind | 'folder';
+  /**
+   * For structured-list sections that should render as a collapsible folder
+   * in the Explorer. When true, the Explorer reads the list's entry titles
+   * and renders them as children at render time (no extra section keys needed).
+   */
+  inlineChildren?: boolean;
+  /** Legacy explicit children (unused now, kept for backward type compat). */
   children?: SectionKey[];
 };
 
@@ -50,7 +57,7 @@ export const SECTIONS_MANIFEST: Record<SectionKey, ManifestEntry> = {
     icon: Briefcase,
     isFolder: true,
     kind: 'folder',
-    children: [],
+    inlineChildren: true,
   },
   projects: {
     key: 'projects',
@@ -59,15 +66,16 @@ export const SECTIONS_MANIFEST: Record<SectionKey, ManifestEntry> = {
     icon: FolderGit2,
     isFolder: true,
     kind: 'folder',
-    children: [],
+    inlineChildren: true,
   },
   achievements: {
     key: 'achievements',
     label: 'Achievements',
-    extension: 'md',
+    extension: 'folder',
     icon: Trophy,
-    isFolder: false,
-    kind: 'markdown',
+    isFolder: true,
+    kind: 'folder',
+    inlineChildren: true,
   },
   skills: {
     key: 'skills',
@@ -80,18 +88,20 @@ export const SECTIONS_MANIFEST: Record<SectionKey, ManifestEntry> = {
   education: {
     key: 'education',
     label: 'Education',
-    extension: 'md',
+    extension: 'folder',
     icon: GraduationCap,
-    isFolder: false,
-    kind: 'markdown',
+    isFolder: true,
+    kind: 'folder',
+    inlineChildren: true,
   },
   leadership: {
     key: 'leadership',
     label: 'Leadership',
-    extension: 'md',
+    extension: 'folder',
     icon: Users,
-    isFolder: false,
-    kind: 'markdown',
+    isFolder: true,
+    kind: 'folder',
+    inlineChildren: true,
   },
   contact: {
     key: 'contact',

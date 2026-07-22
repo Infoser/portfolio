@@ -10,12 +10,6 @@ type ThemeState = {
   applyToDocument: () => void;
 };
 
-const prefersDark = (): ThemeMode =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
-
 const applyMode = (mode: ThemeMode) => {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
@@ -26,7 +20,7 @@ const applyMode = (mode: ThemeMode) => {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      mode: 'dark',
+      mode: 'light',
       setMode: (mode) => {
         applyMode(mode);
         set({ mode });
@@ -67,7 +61,7 @@ export const initTheme = () => {
     } catch {
     }
   }
-  const initial = prefersDark();
+  const initial: ThemeMode = 'light';
   applyMode(initial);
   useThemeStore.setState({ mode: initial });
 };

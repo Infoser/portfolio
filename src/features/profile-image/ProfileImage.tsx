@@ -8,7 +8,7 @@ export function ProfileImage({ src, alt, className }: ProfileImageProps) {
   return (
     <figure
       className={
-        'group relative mx-auto w-48 shrink-0 overflow-hidden rounded-lg border border-border bg-surface shadow-sm md:sticky md:top-6 md:w-56 ' +
+        'group relative mx-auto w-32 shrink-0 overflow-hidden rounded-lg border border-border bg-surface shadow-sm sm:w-44 md:w-56 md:sticky md:top-6 ' +
         (className ?? '')
       }
     >

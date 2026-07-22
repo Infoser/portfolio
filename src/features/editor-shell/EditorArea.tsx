@@ -16,7 +16,7 @@ function Gutter() {
   return (
     <div
       aria-hidden="true"
-      className="sticky top-0 shrink-0 select-none self-start bg-surface/40 pl-3 pr-2 pt-6 font-mono text-[11px] leading-6 text-muted-foreground/30 [user-select:none]"
+      className="sticky top-0 hidden shrink-0 select-none self-start bg-surface/40 pl-3 pr-2 pt-6 font-mono text-[11px] leading-6 text-muted-foreground/30 [user-select:none] md:block"
       style={{ minHeight: '100%' }}
     >
       {Array.from({ length: GUTTER_LINES }, (_, i) => (
@@ -42,7 +42,7 @@ export function EditorArea({ children, placeholder }: EditorAreaProps) {
             className="flex h-full min-h-0 overflow-y-auto"
           >
             <Gutter />
-            <div className="flex-1 min-w-0 px-6 py-6">
+            <div className="flex-1 min-w-0 px-4 py-4 md:px-6 md:py-6">
               {children ? children(activeTab) : <DefaultPlaceholder sectionKey={activeTab} />}
             </div>
           </motion.div>

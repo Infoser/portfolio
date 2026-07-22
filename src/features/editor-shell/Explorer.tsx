@@ -1,7 +1,9 @@
-import { SECTIONS_MANIFEST, SECTION_KEYS, isFolderKey, type SectionKey } from '@/config/sections-manifest';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { SECTIONS_MANIFEST, SECTION_KEYS, isFolderKey, type SectionKey, type FolderKey } from '@/config/sections-manifest';
+import { ChevronRight, ChevronDown, FileText } from 'lucide-react';
 import { useState, type ComponentType } from 'react';
 import { useTabsStore } from '@/store/tabs';
+import { getStaticSectionContent } from '@/sections-content';
+import type { StructuredListContent } from '@/types/sections';
 import { cn } from '@/lib/utils';
 
 type FolderState = Record<string, boolean>;
@@ -12,6 +14,12 @@ const FolderToggle = ({ open, className }: { open: boolean; className?: string }
 const FileIcon = ({ Icon, className }: { Icon: ComponentType<{ className?: string }>; className?: string }) => (
   <Icon className={cn('size-3.5', className)} />
 );
+
+const getInlineChildTitles = (folderKey: SectionKey): string[] => {
+  const content = getStaticSectionContent(folderKey);
+  if (!content || content.kind !== 'structured-list') return [];
+  return (content as StructuredListContent).entries.map((e) => e.title);
+};
 
 export function Explorer() {
   const [folders, setFolders] = useState<FolderState>({ projects: true, experience: true });
@@ -86,11 +94,15 @@ export function Explorer() {
   );
 }
 
-const FolderChildren = ({ folderKey }: { folderKey: 'projects' | 'experience' }) => {
+const FolderChildren = ({ folderKey }: { folderKey: FolderKey }) => {
   const entry = SECTIONS_MANIFEST[folderKey];
-  const children = entry.children as ReadonlyArray<string>;
   const openTab = useTabsStore((s) => s.open);
   const activeTab = useTabsStore((s) => s.activeTab);
+
+  const isInline = entry.inlineChildren === true;
+  const children: Array<{ id: string; label: string }> = isInline
+    ? getInlineChildTitles(folderKey).map((title, idx) => ({ id: `${folderKey}-${idx}`, label: title }))
+    : (entry.children ?? []).map((c) => ({ id: c, label: SECTIONS_MANIFEST[c as SectionKey].label }));
 
   if (children.length === 0) {
     return (
@@ -103,16 +115,14 @@ const FolderChildren = ({ folderKey }: { folderKey: 'projects' | 'experience' })
   return (
     <ul role="group" className="flex flex-col">
       {children.map((child) => {
-        const childKey = child as SectionKey;
-        const manifest = SECTIONS_MANIFEST[childKey];
-        const Icon = manifest.icon;
-        const isActive = activeTab === childKey;
+        const isActive = activeTab === folderKey;
         return (
-          <li key={child}>
+          <li key={child.id}>
             <button
               type="button"
-              onClick={() => openTab(childKey)}
+              onClick={() => openTab(folderKey)}
               aria-current={isActive ? 'page' : undefined}
+              title={child.label}
               className={cn(
                 'flex w-full items-center gap-1.5 py-1 pl-12 pr-3 text-left',
                 isActive
@@ -121,9 +131,8 @@ const FolderChildren = ({ folderKey }: { folderKey: 'projects' | 'experience' })
                 'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               )}
             >
-              <FileIcon Icon={Icon} className={isActive ? 'text-primary' : ''} />
-              <span>{manifest.label}</span>
-              <span className="ml-auto text-[10px] text-muted-foreground">.{manifest.extension}</span>
+              <FileText className={cn('size-3.5 shrink-0', isActive ? 'text-primary' : '')} />
+              <span className="truncate">{child.label}</span>
             </button>
           </li>
         );
