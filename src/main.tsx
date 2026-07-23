@@ -9,9 +9,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// Dismiss the boot splash after React mounts + one frame paints.
-// Grace period of 250ms ensures the splash is visible long enough
-// to read "Loading workspace…" rather than flashing.
+// Dismiss the boot splash after React mounts + first paint.
+// The hamster wheel needs ~1.8s of visibility for the running motion
+// to be clearly perceived before the fade-out begins.
 const dismissBootLoader = () => {
   const el = document.getElementById('boot-loader');
   if (!el) return;
@@ -19,4 +19,4 @@ const dismissBootLoader = () => {
   window.setTimeout(() => el.remove(), 500);
 };
 
-window.requestAnimationFrame(() => window.setTimeout(dismissBootLoader, 250));
+window.requestAnimationFrame(() => window.setTimeout(dismissBootLoader, 1800));
