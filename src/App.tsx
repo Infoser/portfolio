@@ -13,9 +13,6 @@ import { BugCounter, DebugTerminal, SessionTracker } from '@/features/easter-egg
 import Playground from '@/routes/playground';
 import { NotFoundRoute } from '@/routes/not-found';
 
-const ParticleField = lazy(() =>
-  import('@/features/three-background').then((m) => ({ default: m.ParticleField })),
-);
 const AdminGate = lazy(() =>
   import('@/features/admin').then((m) => ({ default: m.AdminGate })),
 );
@@ -85,9 +82,6 @@ function App() {
   return (
     <AppProviders>
       <Helmet defaultTitle="Ishan Kumar Sahu — ML/DL researcher" titleTemplate="%s · portfolio" />
-      <Suspense fallback={null}>
-        <ParticleField />
-      </Suspense>
       <div className="relative z-10">
         <DebugTerminal />
         <BrowserRouter>
