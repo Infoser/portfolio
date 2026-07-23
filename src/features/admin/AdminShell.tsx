@@ -127,8 +127,10 @@ type AdminShellProps = {
 export function AdminShell({ onSignOut }: AdminShellProps) {
   const [active, setActive] = useState<SectionKey>('about');
 
-  const nav = SECTION_KEYS.filter((k) => SECTIONS_MANIFEST[k].kind !== 'folder');
-  const nonFolderKeys = nav;
+  // All sections are editable. Folder sections (Experience, Projects, etc.)
+  // have 'folder' as their manifest kind but ship 'structured-list'
+  // SectionContent, which the editor below already handles. Don't filter them out.
+  const nav = SECTION_KEYS;
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
@@ -151,7 +153,7 @@ export function AdminShell({ onSignOut }: AdminShellProps) {
             Sections
           </p>
           <ul className="flex flex-col">
-            {nonFolderKeys.map((key) => {
+            {nav.map((key) => {
               const entry = SECTIONS_MANIFEST[key];
               const isActive = key === active;
               const Icon = entry.icon;

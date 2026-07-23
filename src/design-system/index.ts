@@ -5,7 +5,7 @@ export { themeTokens, type ThemeMode } from './tokens';
 export { typography, type FontRole, type FontConfig, fontRoles } from './typography';
 export { cn } from '@/lib/utils';
 
-export { Button, buttonVariants } from './components/button';
+export { Button } from './components/button';
 export * from './components/dialog';
 export * from './components/tabs';
 export * from './components/tooltip';
