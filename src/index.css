@@ -156,7 +156,6 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     @apply font-body;
-    cursor: url("/cursor/normal-glow-1.ani"), url("/cursor/normal-glow-1.ani"), default;
   }
   body {
     background-color: var(--color-background);
@@ -182,38 +181,6 @@
   }
   ::selection {
     background-color: color-mix(in oklch, var(--color-primary) 30%, transparent);
-  }
-
-  /* Custom cursor set — Night Diamond v3.0 Amethyst Purple by 10240rtm (Public Domain). */
-  /* .ani files are supported in Chromium and Firefox on desktop; Safari shows first frame. */
-  a, button, [role="button"], summary, [data-slot="tabs-trigger"],
-  label[for], select, [role="tab"], [role="menuitem"], [data-slot="accordion-trigger"] {
-    cursor: url("/cursor/link.ani"), url("/cursor/link.ani"), pointer;
-  }
-  input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-  input[type="url"], input[type="number"], input[type="tel"], textarea,
-  [contenteditable="true"], [role="textbox"] {
-    cursor: url("/cursor/text-beam-2.ani"), url("/cursor/text-beam-2.ani"), text;
-  }
-  input[type="checkbox"], input[type="radio"] {
-    cursor: url("/cursor/alt.ani"), url("/cursor/alt.ani"), pointer;
-  }
-  [disabled], [aria-disabled="true"], .disabled {
-    cursor: url("/cursor/no.ani"), url("/cursor/no.ani"), not-allowed;
-  }
-  code, pre, .prose pre, .prose code {
-    cursor: url("/cursor/text-beam-simple.ani"), url("/cursor/text-beam-simple.ani"), default;
-  }
-  /* On touch devices, custom cursors are irrelevant — let the UA handle it. */
-  @media (hover: none) {
-    html, a, button, input, textarea, [contenteditable] {
-      cursor: auto;
-    }
-  }
-  /* Respect users who prefer reduced motion: fall back to non-glow static icons. */
-  @media (prefers-reduced-motion: reduce) {
-    html { cursor: url("/cursor/pres-no-glow.ani"), default; }
-    a, button, [role="button"], summary { cursor: pointer; }
   }
 }
 
