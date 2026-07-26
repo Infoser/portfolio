@@ -5,6 +5,8 @@ import { JsonRenderer } from './renderers/JsonRenderer';
 import { TomlRenderer } from './renderers/TomlRenderer';
 import { StructuredListRenderer } from './renderers/StructuredListRenderer';
 import { ProjectRenderer } from './renderers/ProjectRenderer';
+import { SkillsRenderer } from './renderers/SkillsRenderer';
+import { ContactRenderer } from './renderers/ContactRenderer';
 
 type SectionRendererProps = {
   sectionKey: SectionKey;
@@ -18,8 +20,22 @@ export function SectionRenderer({ sectionKey, content }: SectionRendererProps) {
     case 'markdown':
       return <MarkdownRenderer body={content.body} />;
     case 'json':
+      if (sectionKey === 'skills') {
+        return (
+          <SkillsRenderer
+            data={content.data as Record<string, unknown>}
+          />
+        );
+      }
       return <JsonRenderer data={content.data} />;
     case 'toml':
+      if (sectionKey === 'contact') {
+        return (
+          <ContactRenderer
+            data={content.data as Record<string, unknown>}
+          />
+        );
+      }
       return <TomlRenderer data={content.data} />;
     case 'structured-list':
       if (sectionKey === 'projects') {

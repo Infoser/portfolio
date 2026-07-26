@@ -39,4 +39,40 @@ export const motionPresets = {
     { opacity: 0, scale: 1.02 },
     { duration: 0.2, ease: 'easeOut' },
   ),
+  /**
+   * Card reveal as it scrolls into view. Use with `whileInView="show" initial="hidden"`.
+   * The `viewport={{ once: true }}` option on the motion element ensures it
+   * doesn't re-trigger on every scroll pass.
+   */
+  inViewReveal: {
+    hidden: { opacity: 0, y: 16 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    },
+  } as Variants,
+  /**
+   * Container variant that staggers its children's reveals when the container
+   * enters the viewport. Pairs with `chipStaggerChild`.
+   */
+  chipStagger: {
+    hidden: {},
+    show: {
+      transition: { staggerChildren: 0.04, delayChildren: 0.05 },
+    },
+  } as Variants,
+  /**
+   * Individual chip in a stagged group. Use as the variants of a child of a
+   * motion element with `chipStagger`.
+   */
+  chipStaggerChild: {
+    hidden: { opacity: 0, scale: 0.85, y: 4 },
+    show: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+    },
+  } as Variants,
 } as const;
