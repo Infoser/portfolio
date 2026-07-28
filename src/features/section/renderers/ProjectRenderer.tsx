@@ -4,7 +4,7 @@ import type { ComponentType } from 'react';
 import type { StructuredEntryBase } from '@/types/sections';
 import { cn } from '@/lib/utils';
 
-const LINK_ICON: Record<'demo' | 'site' | 'github' | 'paper', ComponentType<{ className?: string }>> = {
+const LINK_ICON: Partial<Record<'demo' | 'site' | 'github' | 'paper' | 'read-more', ComponentType<{ className?: string }>>> = {
   demo: Play,
   site: ExternalLink,
   github: Code2,

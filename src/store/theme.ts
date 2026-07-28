@@ -20,7 +20,7 @@ const applyMode = (mode: ThemeMode) => {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      mode: 'light',
+      mode: 'dark',
       setMode: (mode) => {
         applyMode(mode);
         set({ mode });
@@ -61,7 +61,7 @@ export const initTheme = () => {
     } catch {
     }
   }
-  const initial: ThemeMode = 'light';
+  const initial: ThemeMode = 'dark';
   applyMode(initial);
   useThemeStore.setState({ mode: initial });
 };

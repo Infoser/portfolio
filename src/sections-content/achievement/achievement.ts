@@ -12,6 +12,8 @@ export const achievementsContent: StructuredListContent = {
         'National-level government-run competition. Won with ShrutiAI — an offline ISL-to-English sign-language translation system deployed on Raspberry Pi.',
       ],
       tags: ['Smart India Hackathon', 'Hardware', 'ISL', 'Edge AI'],
+      imageUrl: 'https://placehold.co/640x360?text=ShrutiAI+at+SIH+2025',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
     {
       id: 'dst-inidhi-2025',
@@ -22,6 +24,8 @@ export const achievementsContent: StructuredListContent = {
         'Government research funding granted under the DST i-NIDHI scheme via CSVTU for the real-world municipal deployment of BinSense (IoT smart-waste platform).',
       ],
       tags: ['Research Grant', 'DST i-NIDHI', 'IoT', 'Civic Tech'],
+      imageUrl: 'https://placehold.co/640x360?text=BinSense+DST+i-NIDHI',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
     {
       id: 'hult-prize-2026',
@@ -32,6 +36,8 @@ export const achievementsContent: StructuredListContent = {
         'Pitched BinSense at the India National Finals of the HULT Prize — a global student competition for social-impact ventures.',
       ],
       tags: ['HULT Prize', 'Pitch', 'Social Impact', 'IIT Bombay'],
+      imageUrl: 'https://placehold.co/640x360?text=BinSense+at+HULT+Prize',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
     {
       id: 'code-of-phoenix-2024',
@@ -42,6 +48,8 @@ export const achievementsContent: StructuredListContent = {
         'Won first prize in the open category at Code of the Phoenix, IIIT Naya Raipur, with BinSense.',
       ],
       tags: ['Hackathon', 'IoT', 'IIIT Naya Raipur'],
+      imageUrl: 'https://placehold.co/640x360?text=BinSense+at+Code+of+the+Phoenix',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
     {
       id: 'bit-shine-2023',
@@ -52,6 +60,8 @@ export const achievementsContent: StructuredListContent = {
         'Runner-up at the departmental BIT-SHINE hackathon at BIT Durg.',
       ],
       tags: ['Hackathon', 'BIT Durg'],
+      imageUrl: 'https://placehold.co/640x360?text=BIT-SHINE+2023',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
     {
       id: 'ieee-ideathon-2025',
@@ -62,6 +72,8 @@ export const achievementsContent: StructuredListContent = {
         'Won first prize at the IEEE BITD Disaster Idea-thon.',
       ],
       tags: ['IEEE', 'Idea-thon', 'BIT Durg'],
+      imageUrl: 'https://placehold.co/640x360?text=IEEE+Disaster+Idea-thon',
+      links: [{ label: 'Read more about it', href: '#', kind: 'read-more' }],
     },
   ],
 };

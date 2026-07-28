@@ -10,18 +10,18 @@
     <meta name="color-scheme" content="dark light" />
     <script>
       // Apply theme before first paint to avoid splash/bg flash.
-      // Mirrors src/store/theme.ts logic: default to light, honor stored choice.
+      // Mirrors src/store/theme.ts logic: default to dark, honor stored choice.
       (function () {
         try {
           var raw = localStorage.getItem('infoser-theme');
+          var mode = 'dark';
           if (raw) {
-            var mode = (JSON.parse(raw).state || {}).mode;
-            if (mode === 'dark' || mode === 'light') {
-              var root = document.documentElement;
-              root.classList.toggle('dark', mode === 'dark');
-              root.style.colorScheme = mode;
-            }
+            var stored = (JSON.parse(raw).state || {}).mode;
+            if (stored === 'dark' || stored === 'light') mode = stored;
           }
+          var root = document.documentElement;
+          root.classList.toggle('dark', mode === 'dark');
+          root.style.colorScheme = mode;
         } catch (e) {}
       })();
     </script>

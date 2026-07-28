@@ -23,7 +23,7 @@ export type StructuredEntryBase = {
   end?: string;
   location?: string;
   bullets?: string[];
-  links?: Array<{ label: string; href: string; kind?: 'demo' | 'site' | 'github' | 'paper' }>;
+  links?: Array<{ label: string; href: string; kind?: 'demo' | 'site' | 'github' | 'paper' | 'read-more' }>;
   imageUrl?: string;
   tags?: string[];
 };

@@ -5,6 +5,7 @@ import { ActivityBar } from './ActivityBar';
 import { Explorer } from './Explorer';
 import { TabStrip } from './TabStrip';
 import { EditorArea } from './EditorArea';
+import { OutlineRail } from './OutlineRail';
 import { TitleBar } from './TitleBar';
 import { StatusBar } from './StatusBar';
 
@@ -63,7 +64,10 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
         {/* Main pane */}
         <main className="flex min-w-0 flex-1 flex-col">
           <TabStrip />
-          <EditorArea>{renderSection}</EditorArea>
+          <div className="flex min-h-0 flex-1">
+            <EditorArea>{renderSection}</EditorArea>
+            <OutlineRail />
+          </div>
         </main>
       </div>
 
@@ -72,4 +76,4 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
   );
 }
 
-export { ActivityBar, Explorer, TabStrip, EditorArea, TitleBar, StatusBar };
+export { ActivityBar, Explorer, TabStrip, EditorArea, OutlineRail, TitleBar, StatusBar };

@@ -6,8 +6,6 @@ import { getStaticSectionContent } from '@/sections-content';
 import type { StructuredListContent } from '@/types/sections';
 import { cn } from '@/lib/utils';
 
-type FolderState = Record<string, boolean>;
-
 const FolderToggle = ({ open, className }: { open: boolean; className?: string }) =>
   open ? <ChevronDown className={cn('size-3', className)} /> : <ChevronRight className={cn('size-3', className)} />;
 
@@ -22,11 +20,17 @@ const getInlineChildTitles = (folderKey: SectionKey): string[] => {
 };
 
 export function Explorer() {
-  const [folders, setFolders] = useState<FolderState>({ projects: true, experience: true });
+  // Accordion-style state: at most one folder open at a time. `null` means
+  // all folders collapsed. Clicking a folder either opens it (closing the
+  // previously-open one) or closes it if it is already the open one.
+  const [openFolder, setOpenFolder] = useState<FolderKey | null>(null);
   const openTab = useTabsStore((s) => s.open);
   const activeTab = useTabsStore((s) => s.activeTab);
 
-  const toggleFolder = (key: string) => setFolders((f) => ({ ...f, [key]: !f[key] }));
+  const handleFolderClick = (key: FolderKey) => {
+    setOpenFolder((curr) => (curr === key ? null : key));
+    openTab(key);
+  };
 
   return (
     <nav aria-label="Sections" className="flex h-full flex-col gap-1 py-2 font-mono text-xs">
@@ -39,16 +43,13 @@ export function Explorer() {
           const Icon = entry.icon;
 
           if (isFolderKey(key)) {
-            const isFolderOpen = folders[key] ?? true;
+            const isFolderOpen = openFolder === key;
             const isActive = activeTab === key;
             return (
               <li key={key}>
                 <button
                   type="button"
-                  onClick={() => {
-                    toggleFolder(key);
-                    openTab(key);
-                  }}
+                  onClick={() => handleFolderClick(key)}
                   aria-expanded={isFolderOpen}
                   className={cn(
                     'flex w-full items-center gap-1.5 px-3 py-1 text-left',

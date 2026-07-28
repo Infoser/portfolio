@@ -12,17 +12,19 @@ import {
   Brain,
   CircuitBoard,
   Languages,
+  BookOpen,
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, HuggingfaceIcon, type BrandIconComponent } from './brandIcons';
 
 export type IconProps = { className?: string };
 
 /** Icon used for each renderer's structured-entry link `kind`. */
-export const LINK_ICON: Record<'demo' | 'site' | 'github' | 'paper', ComponentType<IconProps>> = {
+export const LINK_ICON: Partial<Record<'demo' | 'site' | 'github' | 'paper' | 'read-more', ComponentType<IconProps>>> = {
   demo: Play,
   site: ExternalLink,
   github: Code2,
   paper: FileText,
+  'read-more': BookOpen,
 };
 
 export const LINK_ICON_DEFAULT = ExternalLink;
