@@ -29,6 +29,39 @@ type ContactData = {
   cv?: string;
 };
 
+/**
+ * Normalizes a flat record with dotted keys (`"links.github": "..."`,
+ * `"identity.name": "..."`) into nested objects (`links: { github: "..." }`,
+ * `identity: { name: "..." }`). The admin TOML editor stores nested fields
+ * as flat dotted keys (see TomlEditor.tsx serialize/parse), so any contact
+ * row saved via the admin panel arrives in the flat form. This helper
+ * restores the nested shape the renderer expects, while leaving records
+ * that are already nested untouched.
+ *
+ * Arrays and non-object values are passed through unchanged.
+ */
+const unnestDottedKeys = <T extends Record<string, unknown>>(src: T): T => {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(src ?? {})) {
+    if (!k.includes('.')) {
+      out[k] = v;
+      continue;
+    }
+    const parts = k.split('.');
+    let node = out;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      const existing = node[p];
+      node[p] = (existing && typeof existing === 'object' && !Array.isArray(existing))
+        ? (existing as Record<string, unknown>)
+        : {};
+      node = node[p] as Record<string, unknown>;
+    }
+    node[parts[parts.length - 1]] = v;
+  }
+  return out as T;
+};
+
 const staggeredChip = {
   collapsed: { opacity: 0, x: -8, scale: 0.8 },
   expanded: { opacity: 1, x: 0, scale: 1 },
@@ -152,7 +185,9 @@ function ContactActions({ email, phone, cv }: { email?: string; phone?: string; 
 /** Renders the Contact section as an identity card + a Connect fan-out and
  *  a primary CTA card for email/phone/CV. Animated via framer-motion `whileInView`. */
 export function ContactRenderer({ data, className }: ContactRendererProps) {
-  const contact = data as ContactData;
+  // Admin TOML editor stores nested fields as flat dotted keys
+  // (`links.github`, `identity.name`). Normalize before reading.
+  const contact = unnestDottedKeys(data) as ContactData;
   const links = contact.links ?? {};
   const hasActions = Boolean(contact.email || contact.phone || contact.cv);
 
