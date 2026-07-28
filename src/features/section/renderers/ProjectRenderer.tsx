@@ -31,7 +31,7 @@ export function ProjectRenderer({ entries, emptyMessage, className }: ProjectRen
   return (
     <ol role="list" className={cn('flex flex-col gap-12', className)}>
       {entries.map((entry, idx) => (
-        <li key={entry.id} className="relative">
+        <li key={entry.id} id={entry.id} className="relative scroll-mt-6">
           <article className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_280px]">
             <div className="order-2 flex flex-col gap-5 md:order-1">
               <header className="flex flex-col gap-2">

@@ -6,9 +6,14 @@ type ProfileImageProps = {
 
 /**
  * Polaroid stack frame (adapted from Uiverse.io by janisar-hyder).
- * Three paper layers sit behind a square photo — on hover the stack
- * fans out (5deg stack tilt, -4deg/+4deg inner layers). The photo
- * itself is grayscale at rest, full colour on hover.
+ * Three paper layers sit behind the photo — on hover the stack fans out
+ * (5deg stack tilt, -4deg/+4deg inner layers). The photo itself is
+ * grayscale at rest, full colour on hover.
+ *
+ * Layout: the polaroid card is a tall rectangle (taller than the square
+ * photo). The photo occupies the top portion; beneath it, inside the
+ * polaroid frame's white space, sits the name as a caption. This keeps
+ * the name visible inside the frame without overlapping the photo.
  */
 export function ProfileImage({ src, alt, className }: ProfileImageProps) {
   return (
@@ -18,10 +23,8 @@ export function ProfileImage({ src, alt, className }: ProfileImageProps) {
         (className ?? '')
       }
     >
-      {/* Polaroid card — paper background, square image, slim caption strip */}
-      <div
-        className="group/card relative aspect-square cursor-pointer border-4 border-foreground bg-surface p-[5%] transition-transform duration-150 ease-out"
-      >
+      {/* Polaroid card — paper background, square photo on top, caption strip below */}
+      <div className="group/card relative block cursor-pointer border-4 border-foreground bg-surface p-[5%] pb-[8%] transition-transform duration-150 ease-out">
         {/* Two rotated paper layers behind the card */}
         <span
           aria-hidden="true"
@@ -43,8 +46,8 @@ export function ProfileImage({ src, alt, className }: ProfileImageProps) {
           />
         </div>
 
-        {/* Caption strip — small caption inside the square's bottom space */}
-        <figcaption className="absolute inset-x-[5%] bottom-[5%] text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+        {/* Caption strip — sits inside the polaroid frame, beneath the photo */}
+        <figcaption className="mt-[6%] truncate text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80">
           {alt}
         </figcaption>
       </div>

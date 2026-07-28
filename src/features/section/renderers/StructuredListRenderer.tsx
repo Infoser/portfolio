@@ -55,11 +55,12 @@ export function StructuredListRenderer({ entries, emptyMessage, className }: Str
         return (
           <motion.li
             key={entry.id}
+            id={entry.id}
             initial={{ opacity: 0, x: -12 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.4, delay: idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
+            className="relative scroll-mt-6"
           >
             {/* Node marker on the spine. */}
             <span

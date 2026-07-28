@@ -42,7 +42,7 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
                 </SheetTitle>
               </SheetHeader>
               <div className="h-full overflow-y-auto">
-                <Explorer />
+                <Explorer onAfterOpen={() => setDrawerOpen(false)} />
               </div>
             </SheetContent>
           </Sheet>
