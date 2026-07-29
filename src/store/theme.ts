@@ -45,23 +45,35 @@ export const useThemeStore = create<ThemeState>()(
 );
 
 export const initTheme = () => {
-  let stored: unknown = null;
-  try {
-    stored = useThemeStore.persist.getOptions().storage?.getItem(THEME_STORAGE_KEY);
-  } catch {
-  }
-  if (typeof stored === 'string') {
+  // The persist middleware's default storage (createJSONStorage) returns the
+  // already-parsed { state, version } object, NOT a raw JSON string. The old
+  // code did `typeof stored === 'string'` which was always false, so the
+  // user's saved theme was silently dropped on every reload — always dark.
+  //
+  // Delegate to the middleware's own rehydrate so storage-shape handling stays
+  // the middleware's job. The store's `onRehydrateStorage` callback applies
+  // the mode to the DOM whenever a stored state is found. After rehydrate
+  // resolves (synchronously for localStorage), if the store still reports the
+  // initial 'dark' default AND there was no persisted state in storage, we
+  // explicitly pin dark so the DOM matches.
+  const storage = useThemeStore.persist.getOptions().storage;
+  const hasStored = (() => {
     try {
-      const parsed = JSON.parse(stored) as { state?: { mode?: ThemeMode } };
-      if (parsed.state?.mode) {
-        applyMode(parsed.state.mode);
-        useThemeStore.setState({ mode: parsed.state.mode });
-        return;
-      }
+      if (!storage) return false;
+      const v = storage.getItem(THEME_STORAGE_KEY);
+      // For the default localStorage storage v is the parsed StorageValue
+      // ({state, version}); for async storages it is a Promise. null/undefined
+      // means no stored entry. Anything else means we have a stored value.
+      return v != null && typeof v !== 'function';
     } catch {
+      return false;
     }
+  })();
+
+  useThemeStore.persist.rehydrate();
+
+  if (!hasStored) {
+    applyMode('dark');
+    useThemeStore.setState({ mode: 'dark' });
   }
-  const initial: ThemeMode = 'dark';
-  applyMode(initial);
-  useThemeStore.setState({ mode: initial });
 };

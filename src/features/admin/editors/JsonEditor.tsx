@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 
 const MonacoEditor = lazy(() =>
@@ -22,16 +22,26 @@ export function JsonEditor({ initialData, onChange }: JsonEditorProps) {
   });
   const [error, setError] = useState<string | null>(null);
 
+  // Keep the latest onChange in a ref so the parse effect doesn't re-run when
+  // the parent recreates the callback each render. Re-running on a fresh
+  // onChange is what caused the previous infinite update loop: effect -> call
+  // onChange -> parent setDraft(new object literal) -> new onChange reference
+  // -> effect fires again -> "Maximum update depth exceeded".
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   useEffect(() => {
     try {
       const parsed = JSON.parse(text);
       JsonValue.parse(parsed);
       setError(null);
-      onChange(parsed);
+      onChangeRef.current(parsed);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid JSON');
     }
-  }, [text, onChange]);
+  }, [text]);
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">

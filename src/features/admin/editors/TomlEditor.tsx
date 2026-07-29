@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 type TomlEditorProps = {
@@ -53,9 +53,17 @@ export function TomlEditor({ initialData, onChange }: TomlEditorProps) {
   const [text, setText] = useState(() => serialize(initialData));
   const parsed = useMemo(() => naiveTomlParse(text), [text]);
 
+  // Keep latest onChange in a ref to avoid re-running the propagate effect on
+  // every parent render (which created a new onChange arrow and caused an
+  // infinite update loop with the previous [parsed, onChange] deps).
+  const onChangeRef = useRef(onChange);
   useEffect(() => {
-    if (parsed.ok) onChange(parsed.data);
-  }, [parsed, onChange]);
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (parsed.ok) onChangeRef.current(parsed.data);
+  }, [parsed]);
 
   return (
     <div className="grid h-full min-h-0 grid-cols-1 gap-4 md:grid-cols-2">

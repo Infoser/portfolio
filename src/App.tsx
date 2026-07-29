@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { AppProviders } from '@/app/AppProviders';
+import { ErrorBoundary } from '@/design-system/ErrorBoundary';
 import { EditorShell } from '@/features/editor-shell';
 import { ProfileImage } from '@/features/profile-image';
 import { SectionRenderer } from '@/features/section';
@@ -89,29 +90,33 @@ function App() {
             <Route
               path="/"
               element={
-                <EditorShell
-                  renderSection={renderSection}
-                  statusCenterSlot={<BugCounter />}
-                  statusRightSlot={<SessionTracker />}
-                />
+                <ErrorBoundary label="workspace">
+                  <EditorShell
+                    renderSection={renderSection}
+                    statusCenterSlot={<BugCounter />}
+                    statusRightSlot={<SessionTracker />}
+                  />
+                </ErrorBoundary>
               }
             />
-          <Route path="/playground" element={<Playground />} />
-          <Route
-            path="/__admin__"
-            element={
-              <Suspense
-                fallback={
-                  <div className="flex min-h-dvh items-center justify-center bg-background font-mono text-sm text-muted-foreground">
-                    Loading admin…
-                  </div>
-                }
-              >
-                <AdminGate />
-              </Suspense>
-            }
-          />
-          <Route path="*" element={<NotFoundRoute />} />
+            <Route path="/playground" element={<Playground />} />
+            <Route
+              path="/__admin__"
+              element={
+                <ErrorBoundary label="admin panel">
+                  <Suspense
+                    fallback={
+                      <div className="flex min-h-dvh items-center justify-center bg-background font-mono text-sm text-muted-foreground">
+                        Loading admin…
+                      </div>
+                    }
+                  >
+                    <AdminGate />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route path="*" element={<NotFoundRoute />} />
           </Routes>
         </BrowserRouter>
       </div>

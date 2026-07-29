@@ -1,5 +1,6 @@
 export { ThemeProvider } from './ThemeProvider';
 export { ThemeToggle } from './ThemeToggle';
+export { ErrorBoundary } from './ErrorBoundary';
 export { motionPresets } from './motion';
 export { themeTokens, type ThemeMode } from './tokens';
 export { typography, type FontRole, type FontConfig, fontRoles } from './typography';
