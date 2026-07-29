@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import type { SectionKey } from '@/config/sections-manifest';
-import { SECTIONS_MANIFEST, SECTION_KEYS } from '@/config/sections-manifest';
+import { useEffect, useState } from 'react';
+import type { AdminSectionKey, MetaKey } from '@/config/sections-manifest';
+import {
+  SECTIONS_MANIFEST,
+  SECTION_KEYS,
+  META_MANIFEST,
+  META_KEYS,
+} from '@/config/sections-manifest';
 import { MarkdownEditor } from './editors/MarkdownEditor';
 import { StructuredListEditor } from './editors/StructuredListEditor';
 import { JsonEditor } from './editors/JsonEditor';
 import { TomlEditor } from './editors/TomlEditor';
+import { BannerEditor } from './editors/BannerEditor';
 import { SectionRenderer } from '@/features/section';
 import { useSection } from '@/lib/hooks/useSection';
 import { updateSectionContent } from '@/lib/auth';
@@ -14,12 +20,21 @@ import { cn } from '@/lib/utils';
 import { SaveIcon, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const SectionEditor = ({ sectionKey }: { sectionKey: SectionKey }) => {
-  const entry = SECTIONS_MANIFEST[sectionKey];
+const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
   const { content, isLoading } = useSection(sectionKey);
   const [draft, setDraft] = useState<unknown>(content);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Initialize draft whenever the freshly-loaded content changes (mount or
+  // section switch). Kept in an effect rather than during render so we never
+  // mutate state mid-render. The parent passes a `key={sectionKey}` so this
+  // component remounts cleanly when switching sections.
+  useEffect(() => {
+    if (!content) return;
+    setDraft(content);
+    setDirty(false);
+  }, [content]);
 
   if (isLoading || !content) {
     return (
@@ -29,10 +44,10 @@ const SectionEditor = ({ sectionKey }: { sectionKey: SectionKey }) => {
     );
   }
 
-  if (!dirty) {
-    // initialize draft when content first becomes available
-    queueMicrotask(() => setDraft(content));
-  }
+  const entry =
+    sectionKey in SECTIONS_MANIFEST
+      ? SECTIONS_MANIFEST[sectionKey as Exclude<AdminSectionKey, MetaKey>]
+      : META_MANIFEST[sectionKey as MetaKey];
 
   const handleChange = (next: unknown) => {
     setDraft(next);
@@ -88,7 +103,7 @@ const SectionEditor = ({ sectionKey }: { sectionKey: SectionKey }) => {
           )}
           {content.kind === 'structured-list' && (
             <StructuredListEditor
-              sectionKey={sectionKey}
+              sectionKey={sectionKey as Exclude<AdminSectionKey, MetaKey>}
               initialEntries={content.entries}
               onChange={(entries) => handleChange({ kind: 'structured-list', entries })}
             />
@@ -105,6 +120,15 @@ const SectionEditor = ({ sectionKey }: { sectionKey: SectionKey }) => {
               onChange={(data) => handleChange({ kind: 'toml', data })}
             />
           )}
+          {content.kind === 'banner' && (
+            <BannerEditor
+              initialEnabled={content.enabled}
+              initialMessage={content.message}
+              onChange={({ enabled, message }) =>
+                handleChange({ kind: 'banner', enabled, message })
+              }
+            />
+          )}
         </div>
 
         <details className="overflow-hidden rounded-md border border-border bg-surface">
@@ -112,10 +136,35 @@ const SectionEditor = ({ sectionKey }: { sectionKey: SectionKey }) => {
             Live preview (current saved content)
           </summary>
           <div className="border-t border-border bg-background p-4">
-            <SectionRenderer sectionKey={sectionKey} content={content} />
+            {content.kind === 'banner' ? (
+              <BannerPreview enabled={content.enabled} message={content.message} />
+            ) : (
+              <SectionRenderer
+                sectionKey={sectionKey as Exclude<AdminSectionKey, MetaKey>}
+                content={content}
+              />
+            )}
           </div>
         </details>
       </div>
+    </div>
+  );
+};
+
+const BannerPreview = ({ enabled, message }: { enabled: boolean; message: string }) => {
+  if (!enabled || !message.trim()) {
+    return (
+      <p className="font-mono text-xs text-muted-foreground">
+        Banner is currently hidden on the public site.
+      </p>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-border bg-primary/15 px-3 py-1.5 font-mono text-xs text-foreground/90">
+      <span aria-hidden className="text-primary">
+        ▸
+      </span>
+      <span className="truncate">{message}</span>
     </div>
   );
 };
@@ -125,12 +174,7 @@ type AdminShellProps = {
 };
 
 export function AdminShell({ onSignOut }: AdminShellProps) {
-  const [active, setActive] = useState<SectionKey>('about');
-
-  // All sections are editable. Folder sections (Experience, Projects, etc.)
-  // have 'folder' as their manifest kind but ship 'structured-list'
-  // SectionContent, which the editor below already handles. Don't filter them out.
-  const nav = SECTION_KEYS;
+  const [active, setActive] = useState<AdminSectionKey>('about');
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
@@ -148,13 +192,47 @@ export function AdminShell({ onSignOut }: AdminShellProps) {
         </button>
       </header>
       <div className="flex min-h-0 flex-1">
-        <nav aria-label="Admin section list" className="w-56 shrink-0 overflow-y-auto border-r border-border bg-surface py-3">
+        <nav
+          aria-label="Admin section list"
+          className="w-56 shrink-0 overflow-y-auto border-r border-border bg-surface py-3"
+        >
           <p className="px-3 pb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             Sections
           </p>
           <ul className="flex flex-col">
-            {nav.map((key) => {
+            {SECTION_KEYS.map((key) => {
               const entry = SECTIONS_MANIFEST[key];
+              const isActive = key === active;
+              const Icon = entry.icon;
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(key)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm',
+                      isActive
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground/80 hover:bg-muted hover:text-foreground',
+                      'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                    )}
+                  >
+                    <Icon className="size-3.5" aria-hidden="true" />
+                    {entry.label}
+                    <span className="ml-auto text-[10px] text-muted-foreground">.{entry.extension}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p className="mt-4 px-3 pb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Site Settings
+          </p>
+          <ul className="flex flex-col">
+            {META_KEYS.map((key) => {
+              const entry = META_MANIFEST[key];
               const isActive = key === active;
               const Icon = entry.icon;
               return (
@@ -181,7 +259,9 @@ export function AdminShell({ onSignOut }: AdminShellProps) {
           </ul>
         </nav>
         <main className="min-w-0 flex-1 overflow-y-auto p-6">
-          <SectionEditor sectionKey={active} />
+          {/* key forces a clean remount on section switch so editor state never
+              bleeds between sections. */}
+          <SectionEditor key={active} sectionKey={active} />
         </main>
       </div>
     </div>

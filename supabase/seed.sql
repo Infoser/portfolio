@@ -2,6 +2,12 @@
 -- Run after 0001_init.sql. SAFE to re-run (upserts).
 
 insert into public.sections (section_key, content) values
+  ('site_banner',
+    '{"kind":"banner","enabled":false,"message":"Under Development"}'::jsonb)
+  on conflict (section_key) do nothing;
+
+
+insert into public.sections (section_key, content) values
   ('about',
     '{"kind":"markdown","body":"# About\n\n_[This section intentionally waiting for Ishan to write it in his own voice — fill via the hidden admin post-deploy.]_\n\nPlaceholder until the real bio lands:\n\n- **Ishan Kumar Sahu** — B.Tech CSE (Data Science) student at Bhilai Institute of Technology, Durg\n- ML/DL researcher focused on deepfake detection, adversarial ML, low-resource NLP, and edge-deployed AI\n- Builder of ShrutiAI (offline ISL translator, Smart India Hackathon 2025 winner), BinSense (IoT smart-waste platform, ₹2L DST i-NIDHI grant), and AksharDhara (Chhattisgarhi dialect speech translation)\n\n> Use the file tree on the left to navigate the rest of the workspace."}'::jsonb)
   on conflict (section_key) do nothing;

@@ -1,6 +1,7 @@
 import { Menu } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/design-system';
+import { SiteBanner } from '@/features/site-banner';
 import { ActivityBar } from './ActivityBar';
 import { Explorer } from './Explorer';
 import { TabStrip } from './TabStrip';
@@ -20,6 +21,7 @@ export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">
+      <SiteBanner />
       <TitleBar onOpenMenu={() => setDrawerOpen(true)} />
       <div className="relative flex min-h-0 flex-1">
         {/* Mobile drawer trigger — overlays top-left */}

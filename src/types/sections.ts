@@ -34,17 +34,25 @@ export type StructuredListContent<TMeta = Record<string, unknown>> = {
   meta?: TMeta;
 };
 
+export type BannerContent = {
+  kind: 'banner';
+  enabled: boolean;
+  message: string;
+};
+
 export type SectionContent =
   | MarkdownContent
   | JsonContent
   | TomlContent
-  | StructuredListContent;
+  | StructuredListContent
+  | BannerContent;
 
 export type SectionContentTypeMap = {
   markdown: MarkdownContent;
   json: JsonContent;
   toml: TomlContent;
   'structured-list': StructuredListContent;
+  banner: BannerContent;
 };
 
 export type SectionContentFor<K extends SectionKind> = K extends keyof SectionContentTypeMap

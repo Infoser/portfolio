@@ -1,5 +1,5 @@
 import type { SectionContent } from '@/types/sections';
-import type { SectionKey } from '@/config/sections-manifest';
+import type { AdminSectionKey, SectionKey } from '@/config/sections-manifest';
 import { aboutContent } from './about';
 import { experienceContent } from './experience';
 import { achievementsContent } from './achievement';
@@ -8,8 +8,9 @@ import { leadershipContent } from './leadership';
 import { skillsContent } from './skills';
 import { contactContent } from './contact';
 import { projectsContent } from './projects';
+import { siteBannerContent } from './site-banner';
 
-const STATIC_SECTIONS: Partial<Record<SectionKey, SectionContent>> = {
+const STATIC_SECTIONS: Partial<Record<AdminSectionKey, SectionContent>> = {
   about: aboutContent,
   experience: experienceContent,
   projects: projectsContent,
@@ -18,9 +19,13 @@ const STATIC_SECTIONS: Partial<Record<SectionKey, SectionContent>> = {
   leadership: leadershipContent,
   skills: skillsContent,
   contact: contactContent,
+  site_banner: siteBannerContent,
 };
 
-export const getStaticSectionContent = (key: SectionKey): SectionContent | undefined =>
+export const getStaticSectionContent = (key: AdminSectionKey): SectionContent | undefined =>
   STATIC_SECTIONS[key];
 
-export const isStaticSection = (key: SectionKey): boolean => Boolean(STATIC_SECTIONS[key]);
+export const isStaticSection = (key: AdminSectionKey): boolean => Boolean(STATIC_SECTIONS[key]);
+
+export const getSectionContent = (key: SectionKey): SectionContent | undefined =>
+  STATIC_SECTIONS[key] as SectionContent | undefined;

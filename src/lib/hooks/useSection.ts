@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { SectionContent } from '@/types/sections';
-import type { SectionKey } from '@/config/sections-manifest';
+import type { AdminSectionKey, SectionKey } from '@/config/sections-manifest';
 import { getStaticSectionContent } from '@/sections-content';
 import { getSupabase, isSupabaseConfigured, type SupabaseSectionRow } from '@/lib/supabase';
 
-const memoryCache = new Map<SectionKey, { content: SectionContent; at: number }>();
+const memoryCache = new Map<AdminSectionKey, { content: SectionContent; at: number }>();
 const TTL_MS = 60_000;
-const inflight = new Map<SectionKey, Promise<SectionContent | undefined>>();
+const inflight = new Map<AdminSectionKey, Promise<SectionContent | undefined>>();
 
 const isFresh = (entry: { at: number }): boolean => Date.now() - entry.at < TTL_MS;
 
-const fetchOnce = async (key: SectionKey): Promise<SectionContent | undefined> => {
+const normalizeKey = (key: AdminSectionKey): string => key;
+
+const fetchOnce = async (key: AdminSectionKey): Promise<SectionContent | undefined> => {
   if (inflight.has(key)) return inflight.get(key)!;
 
   const task = (async (): Promise<SectionContent | undefined> => {
@@ -20,7 +22,7 @@ const fetchOnce = async (key: SectionKey): Promise<SectionContent | undefined> =
     const { data, error } = await supabase
       .from('sections')
       .select('section_key, content, updated_by, updated_at')
-      .eq('section_key', key)
+      .eq('section_key', normalizeKey(key))
       .maybeSingle();
 
     if (error) {
@@ -50,7 +52,7 @@ type UseSectionResult = {
   isLive: boolean;
 };
 
-export function useSection(key: SectionKey): UseSectionResult {
+export function useSection(key: AdminSectionKey): UseSectionResult {
   const [state, setState] = useState<UseSectionResult>(() => {
     const cached = memoryCache.get(key);
     if (cached && isFresh(cached)) {
@@ -98,7 +100,13 @@ export function useSection(key: SectionKey): UseSectionResult {
   return state;
 }
 
-export const clearSectionCache = (key?: SectionKey): void => {
+export function useSectionStrict(key: AdminSectionKey): UseSectionResult {
+  return useSection(key);
+}
+
+export type { SectionKey };
+
+export const clearSectionCache = (key?: AdminSectionKey): void => {
   if (key) memoryCache.delete(key);
   else memoryCache.clear();
 };

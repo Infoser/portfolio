@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Users,
   Mail,
+  Megaphone,
 } from 'lucide-react';
 
 export type SectionKey =
@@ -20,12 +21,21 @@ export type SectionKey =
   | 'leadership'
   | 'contact';
 
-export type SectionKind = 'markdown' | 'json' | 'toml' | 'structured-list';
+export type SectionKind = 'markdown' | 'json' | 'toml' | 'structured-list' | 'banner';
 
 export type FolderKey = 'projects' | 'experience' | 'achievements' | 'education' | 'leadership';
 
+/**
+ * Extra manifest keys that participate in admin editing / site settings but
+ * are NOT shown in the public section explorer. Rendered as the same kind of
+ * row in the admin nav, and dispatched to a dedicated editor.
+ */
+export type MetaKey = 'site_banner';
+
+export type AdminSectionKey = SectionKey | MetaKey;
+
 export type ManifestEntry = {
-  key: SectionKey;
+  key: AdminSectionKey;
   label: string;
   extension: string;
   icon: LucideIcon;
@@ -119,3 +129,29 @@ export const getManifestEntry = (key: SectionKey): ManifestEntry => SECTIONS_MAN
 
 export const isFolderKey = (key: SectionKey): key is FolderKey =>
   SECTIONS_MANIFEST[key].isFolder;
+
+/**
+ * Manifest entries for admin-only "site settings" rows. These reuse the same
+ * `sections` Supabase table (the `content` JSONB column holds the banner
+ * payload), but are never rendered in the public Explorer. The SiteBanner
+ * feature reads `site_banner` from this manifest indirectly via useSection.
+ */
+export const META_MANIFEST: Record<MetaKey, ManifestEntry> = {
+  site_banner: {
+    key: 'site_banner',
+    label: 'Site Banner',
+    extension: 'json',
+    icon: Megaphone,
+    isFolder: false,
+    kind: 'banner',
+  },
+};
+
+export const META_KEYS = Object.keys(META_MANIFEST) as MetaKey[];
+
+export const getMetaManifestEntry = (key: MetaKey): ManifestEntry => META_MANIFEST[key];
+
+export const getAdminManifestEntry = (key: AdminSectionKey): ManifestEntry =>
+  key in SECTIONS_MANIFEST
+    ? SECTIONS_MANIFEST[key as SectionKey]
+    : META_MANIFEST[key as MetaKey];
