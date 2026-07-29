@@ -1,10 +1,25 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, type PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// Substitutes <!--SITE_URL--> tokens in index.html at build time so OG/Twitter
+// meta tags can use absolute URLs when VITE_SITE_URL is configured. When unset,
+// tokens collapse to '', leaving root-relative URLs (/og-image.png) which
+// social crawlers resolve against the page's own origin.
+const siteUrlPlugin = (): PluginOption => {
+  const siteUrl = process.env.VITE_SITE_URL ?? ''
+  const token = '<!--SITE_URL-->'
+  return {
+    name: 'substitute-site-url',
+    transformIndexHtml(html) {
+      return html.split(token).join(siteUrl)
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), siteUrlPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
