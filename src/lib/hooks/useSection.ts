@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SectionContent } from '@/types/sections';
 import type { AdminSectionKey, SectionKey } from '@/config/sections-manifest';
 import { getStaticSectionContent } from '@/sections-content';
@@ -46,14 +46,22 @@ const fetchOnce = async (key: AdminSectionKey): Promise<SectionContent | undefin
   }
 };
 
-type UseSectionResult = {
+type UseSectionState = {
   content: SectionContent | undefined;
   isLoading: boolean;
   isLive: boolean;
 };
 
+export type UseSectionResult = UseSectionState & {
+  /** Force a fresh fetch that bypasses the in-memory TTL cache, and update
+   * this hook's state when the result arrives. Returns the fetched content
+   * (or undefined on failure). Safe to call after a save to refresh the
+   * admin live-preview pane. */
+  refetch: () => Promise<SectionContent | undefined>;
+};
+
 export function useSection(key: AdminSectionKey): UseSectionResult {
-  const [state, setState] = useState<UseSectionResult>(() => {
+  const [state, setState] = useState<UseSectionState>(() => {
     const cached = memoryCache.get(key);
     if (cached && isFresh(cached)) {
       return { content: cached.content, isLoading: false, isLive: true };
@@ -67,7 +75,11 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
-      setState({ content: getStaticSectionContent(key), isLoading: false, isLive: false });
+      setState({
+        content: getStaticSectionContent(key),
+        isLoading: false,
+        isLive: false,
+      });
       return;
     }
 
@@ -97,7 +109,38 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
     };
   }, [key]);
 
-  return state;
+  // `refetch` identity must stay stable for downstream useEffect deps. The
+  // latest key is captured via a ref so the closure can stay referentially
+  // stable across renders without firing stale-key fetches when the
+  // consumer changes key on the same hook instance.
+  const keyRef = useRef(key);
+  keyRef.current = key;
+  const refetchRef = useRef<(() => Promise<SectionContent | undefined>) | null>(null);
+  if (!refetchRef.current) {
+    refetchRef.current = async () => {
+      const k = keyRef.current;
+      memoryCache.delete(k);
+      if (!isSupabaseConfigured()) {
+        const fallback = getStaticSectionContent(k);
+        setState({ content: fallback, isLoading: false, isLive: false });
+        return fallback;
+      }
+      setState((prev) => ({ ...prev, isLoading: true }));
+      const live = await fetchOnce(k);
+      if (live) {
+        setState({ content: live, isLoading: false, isLive: true });
+      } else {
+        setState({
+          content: getStaticSectionContent(k),
+          isLoading: false,
+          isLive: false,
+        });
+      }
+      return live;
+    };
+  }
+
+  return { ...state, refetch: refetchRef.current };
 }
 
 export function useSectionStrict(key: AdminSectionKey): UseSectionResult {

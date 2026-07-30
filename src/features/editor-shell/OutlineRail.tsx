@@ -1,5 +1,5 @@
 import type { ComponentType, MouseEvent } from 'react';
-import { SECTIONS_MANIFEST } from '@/config/sections-manifest';
+import { SECTIONS_MANIFEST, type SectionKey } from '@/config/sections-manifest';
 import type { StructuredListContent } from '@/types/sections';
 import { useSection } from '@/lib/hooks/useSection';
 import { useTabsStore } from '@/store/tabs';
@@ -19,15 +19,24 @@ type Row = { id: string; label: string; sublabel?: string };
  * in StructuredListRenderer / ProjectRenderer is rendered with
  * `id={entry.id}`, and this rail triggers
  * `document.getElementById(id).scrollIntoView(...)` on click.
+ *
+ * Implementation note: this is a thin wrapper around OutlineRailInner that
+ * only mounts the inner (hook-using) component once a tab is active. This
+ * avoids (a) a wasted `useSection('projects')` fetch on initial load when
+ * no tab is open, and (b) one render of stale rows from the previous
+ * section on tab switch — the inner component is keyed by `activeTab`, so
+ * each tab switch produces a fresh hook state initialization.
  */
 export function OutlineRail() {
   const activeTab = useTabsStore((s) => s.activeTab);
-  // useSection returned unconditionally (rules-of-hooks). Falls back to
-  // static seed when Supabase isn't configured, so admin-edited entries
-  // match what the editor pane shows.
-  const { content } = useSection(activeTab ?? 'projects');
   if (!activeTab) return null;
+  return <OutlineRailInner key={activeTab} activeTab={activeTab} />;
+}
 
+type InnerProps = { activeTab: SectionKey };
+
+function OutlineRailInner({ activeTab }: InnerProps) {
+  const { content } = useSection(activeTab);
   const entry = SECTIONS_MANIFEST[activeTab];
   const Icon = entry.icon as ComponentType<{ className?: string }>;
 

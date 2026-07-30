@@ -10,9 +10,14 @@ const JsonValue = z.unknown();
 type JsonEditorProps = {
   initialData: unknown;
   onChange: (data: unknown) => void;
+  /** Called with a non-null message when the current text fails to parse, and
+   * with `null` when it parses cleanly again. Used by the parent to disable
+   * Save while the editor has unparseable input — prevents silently dropping
+   * the user's recent keystrokes on the next successful save. */
+  onParseError?: (error: string | null) => void;
 };
 
-export function JsonEditor({ initialData, onChange }: JsonEditorProps) {
+export function JsonEditor({ initialData, onChange, onParseError }: JsonEditorProps) {
   const [text, setText] = useState(() => {
     try {
       return JSON.stringify(initialData, null, 2);
@@ -32,15 +37,27 @@ export function JsonEditor({ initialData, onChange }: JsonEditorProps) {
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  const onParseErrorRef = useRef(onParseError);
   useEffect(() => {
+    onParseErrorRef.current = onParseError;
+  }, [onParseError]);
+
+  useEffect(() => {
+    let parseError: string | null = null;
     try {
       const parsed = JSON.parse(text);
       JsonValue.parse(parsed);
       setError(null);
       onChangeRef.current(parsed);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid JSON');
+      parseError = err instanceof Error ? err.message : 'Invalid JSON';
+      setError(parseError);
     }
+    // Surface parse-state up to the parent so it can disable Save while the
+    // text doesn't parse. Previously the parent's `dirty` flag stayed true
+    // from the last-valid draft, so Save committed stale data and silently
+    // dropped the user's broken-but-maybe-in-progress edits.
+    if (onParseErrorRef.current) onParseErrorRef.current(parseError);
   }, [text]);
 
   return (

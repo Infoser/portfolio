@@ -4,6 +4,11 @@ import { cn } from '@/lib/utils';
 type TomlEditorProps = {
   initialData: Record<string, unknown>;
   onChange: (data: Record<string, unknown>) => void;
+  /** Called with a non-null error message when the current text fails to
+   * parse, and `null` when it parses cleanly. Used by the parent to disable
+   * Save while the text is unparseable — prevents silently dropping the
+   * user's recent keystrokes on the next successful save. */
+  onParseError?: (error: string | null) => void;
 };
 
 const serialize = (data: Record<string, unknown>): string => {
@@ -49,7 +54,7 @@ const naiveTomlParse = (text: string): { ok: true; data: Record<string, unknown>
   return { ok: true, data: out };
 };
 
-export function TomlEditor({ initialData, onChange }: TomlEditorProps) {
+export function TomlEditor({ initialData, onChange, onParseError }: TomlEditorProps) {
   const [text, setText] = useState(() => serialize(initialData));
   const parsed = useMemo(() => naiveTomlParse(text), [text]);
 
@@ -61,8 +66,20 @@ export function TomlEditor({ initialData, onChange }: TomlEditorProps) {
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  const onParseErrorRef = useRef(onParseError);
   useEffect(() => {
-    if (parsed.ok) onChangeRef.current(parsed.data);
+    onParseErrorRef.current = onParseError;
+  }, [onParseError]);
+
+  useEffect(() => {
+    if (parsed.ok) {
+      onChangeRef.current(parsed.data);
+    }
+    // Surface parse-state up to the parent so it can disable Save while the
+    // text doesn't parse. Previously the parent's `dirty` flag stayed true
+    // from the last-valid draft, so Save committed stale data and silently
+    // dropped the user's broken-but-maybe-in-progress edits.
+    if (onParseErrorRef.current) onParseErrorRef.current(parsed.ok ? null : parsed.error);
   }, [parsed]);
 
   return (

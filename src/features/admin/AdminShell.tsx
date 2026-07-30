@@ -21,10 +21,14 @@ import { SaveIcon, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
-  const { content, isLoading } = useSection(sectionKey);
+  const { content, isLoading, refetch } = useSection(sectionKey);
   const [draft, setDraft] = useState<unknown>(content);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Non-null when the active editor has unparseable input. Disables Save so we
+  // don't commit the last-valid draft and silently drop the user's in-flight
+  // keystrokes. Each editor factory below wires its onParseError into here.
+  const [parseError, setParseError] = useState<string | null>(null);
 
   // Initialize draft whenever the freshly-loaded content changes (mount or
   // section switch). Kept in an effect rather than during render so we never
@@ -59,6 +63,11 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
     try {
       await updateSectionContent(sectionKey, draft);
       clearSectionCache(sectionKey);
+      // Force a refetch so the live-preview pane reflects what was just
+      // persisted (the live-mounted useSection's state stays otherwise
+      // stale — the prior bug made the "saved" status flip green while the
+      // preview still showed the pre-save content).
+      await refetch();
       setDirty(false);
       toast.success(`Saved ${entry.label}.`);
     } catch (err) {
@@ -86,7 +95,16 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
               saved
             </span>
           )}
-          <Button onClick={save} disabled={!dirty || saving}>
+          {parseError && (
+            <span
+              role="alert"
+              title={parseError}
+              className="max-w-[18rem] truncate font-mono text-xs text-destructive"
+            >
+              parse error: {parseError}
+            </span>
+          )}
+          <Button onClick={save} disabled={!dirty || saving || !!parseError}>
             <SaveIcon className="size-3.5" />
             {saving ? 'Saving…' : 'Save'}
           </Button>
@@ -112,12 +130,14 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
             <JsonEditor
               initialData={content.data}
               onChange={(data) => handleChange({ kind: 'json', data })}
+              onParseError={setParseError}
             />
           )}
           {content.kind === 'toml' && (
             <TomlEditor
               initialData={content.data}
               onChange={(data) => handleChange({ kind: 'toml', data })}
+              onParseError={setParseError}
             />
           )}
           {content.kind === 'banner' && (
