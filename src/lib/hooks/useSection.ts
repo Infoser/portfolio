@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import type { SectionContent } from '@/types/sections';
 import type { AdminSectionKey, SectionKey } from '@/config/sections-manifest';
 import { getStaticSectionContent } from '@/sections-content';
@@ -6,18 +7,23 @@ import { getSupabase, isSupabaseConfigured, type SupabaseSectionRow } from '@/li
 
 const memoryCache = new Map<AdminSectionKey, { content: SectionContent; at: number }>();
 const TTL_MS = 60_000;
-const inflight = new Map<AdminSectionKey, Promise<SectionContent | undefined>>();
+const inflight = new Map<AdminSectionKey, Promise<FetchResult>>();
 
 const isFresh = (entry: { at: number }): boolean => Date.now() - entry.at < TTL_MS;
 
 const normalizeKey = (key: AdminSectionKey): string => key;
 
-const fetchOnce = async (key: AdminSectionKey): Promise<SectionContent | undefined> => {
-  if (inflight.has(key)) return inflight.get(key)!;
+type FetchResult =
+  | { ok: true; content: SectionContent }
+  | { ok: false; reason: 'no-config' | 'no-row' | 'error'; error?: string };
 
-  const task = (async (): Promise<SectionContent | undefined> => {
+const fetchOnce = async (key: AdminSectionKey): Promise<FetchResult> => {
+  const existing = inflight.get(key);
+  if (existing) return existing;
+
+  const task = (async (): Promise<FetchResult> => {
     const supabase = await getSupabase();
-    if (!supabase) return undefined;
+    if (!supabase) return { ok: false, reason: 'no-config' };
 
     const { data, error } = await supabase
       .from('sections')
@@ -27,18 +33,18 @@ const fetchOnce = async (key: AdminSectionKey): Promise<SectionContent | undefin
 
     if (error) {
       console.warn(`[useSection] fetch failed for ${key}:`, error.message);
-      return undefined;
+      return { ok: false, reason: 'error', error: error.message };
     }
 
-    if (!data) return undefined;
-    return (data as SupabaseSectionRow).content as SectionContent;
+    if (!data) return { ok: false, reason: 'no-row' };
+    return { ok: true, content: (data as SupabaseSectionRow).content as SectionContent };
   })();
 
   inflight.set(key, task);
   try {
     const result = await task;
-    if (result) {
-      memoryCache.set(key, { content: result, at: Date.now() });
+    if (result.ok) {
+      memoryCache.set(key, { content: result.content, at: Date.now() });
     }
     return result;
   } finally {
@@ -50,6 +56,11 @@ type UseSectionState = {
   content: SectionContent | undefined;
   isLoading: boolean;
   isLive: boolean;
+  /** Non-null only when the live fetch returned an error (NOT when there
+   * simply is no Supabase configured or no row — those are silent fallback
+   * to bundled static content). Surfaces broken live-data layer to the
+   * caller so it isn't serving stale content indefinitely with no signal. */
+  error: string | null;
 };
 
 export type UseSectionResult = UseSectionState & {
@@ -64,14 +75,28 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
   const [state, setState] = useState<UseSectionState>(() => {
     const cached = memoryCache.get(key);
     if (cached && isFresh(cached)) {
-      return { content: cached.content, isLoading: false, isLive: true };
+      return { content: cached.content, isLoading: false, isLive: true, error: null };
     }
     return {
       content: getStaticSectionContent(key),
       isLoading: isSupabaseConfigured(),
       isLive: false,
+      error: null,
     };
   });
+
+  // One-shot toast: fire once per transition into a non-null error state,
+  // not on every re-render. We dedupe by remembering the last error string
+  // we already toasted. Reset when the error clears or changes.
+  const lastToastedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (state.error && state.error !== lastToastedRef.current) {
+      lastToastedRef.current = state.error;
+      toast.error(`Live data unavailable for "${key}": ${state.error}. Using bundled content.`);
+    } else if (!state.error) {
+      lastToastedRef.current = null;
+    }
+  }, [state.error, key]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -79,6 +104,7 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
         content: getStaticSectionContent(key),
         isLoading: false,
         isLive: false,
+        error: null,
       });
       return;
     }
@@ -86,20 +112,23 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
     let cancelled = false;
     const cached = memoryCache.get(key);
     if (cached && isFresh(cached)) {
-      setState({ content: cached.content, isLoading: false, isLive: true });
+      setState({ content: cached.content, isLoading: false, isLive: true, error: null });
       return;
     }
 
     setState((prev) => ({ ...prev, isLoading: true }));
-    fetchOnce(key).then((live) => {
+    fetchOnce(key).then((result) => {
       if (cancelled) return;
-      if (live) {
-        setState({ content: live, isLoading: false, isLive: true });
+      if (result.ok) {
+        setState({ content: result.content, isLoading: false, isLive: true, error: null });
       } else {
         setState({
           content: getStaticSectionContent(key),
           isLoading: false,
           isLive: false,
+          // No-row and no-config are benign (silent fallback, not an error);
+          // surface only genuine fetch errors so the toaster isn't noisy.
+          error: result.reason === 'error' ? (result.error ?? 'fetch error') : null,
         });
       }
     });
@@ -122,21 +151,22 @@ export function useSection(key: AdminSectionKey): UseSectionResult {
       memoryCache.delete(k);
       if (!isSupabaseConfigured()) {
         const fallback = getStaticSectionContent(k);
-        setState({ content: fallback, isLoading: false, isLive: false });
+        setState({ content: fallback, isLoading: false, isLive: false, error: null });
         return fallback;
       }
       setState((prev) => ({ ...prev, isLoading: true }));
-      const live = await fetchOnce(k);
-      if (live) {
-        setState({ content: live, isLoading: false, isLive: true });
-      } else {
-        setState({
-          content: getStaticSectionContent(k),
-          isLoading: false,
-          isLive: false,
-        });
+      const result = await fetchOnce(k);
+      if (result.ok) {
+        setState({ content: result.content, isLoading: false, isLive: true, error: null });
+        return result.content;
       }
-      return live;
+      setState({
+        content: getStaticSectionContent(k),
+        isLoading: false,
+        isLive: false,
+        error: result.reason === 'error' ? (result.error ?? 'fetch error') : null,
+      });
+      return undefined;
     };
   }
 
