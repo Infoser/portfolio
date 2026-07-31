@@ -9,6 +9,24 @@ const memoryCache = new Map<AdminSectionKey, { content: SectionContent; at: numb
 const TTL_MS = 60_000;
 const inflight = new Map<AdminSectionKey, Promise<FetchResult>>();
 
+// Cross-tab cache invalidation. Each browser tab has its own JS runtime →
+// its own memoryCache, so a save in the admin tab (which calls
+// clearSectionCache) only busts that tab's cache; a sibling tab open on
+// the public site would keep serving stale content for up to TTL_MS.
+// BroadcastChannel lets the saving tab tell every other open instance to
+// drop the same key and refetch on next access. Feature-gated: the channel
+// is only allocated when the browser supports it AND Supabase is in play.
+const CHANNEL_NAME = 'infoser:sections-cache';
+let channel: BroadcastChannel | null = null;
+if (typeof BroadcastChannel !== 'undefined' && isSupabaseConfigured()) {
+  channel = new BroadcastChannel(CHANNEL_NAME);
+  channel.onmessage = (ev: MessageEvent<AdminSectionKey>) => {
+    // Bust the cache for only the named key; eviction triggers a refetch
+    // on the next useSection mount/re-run.
+    memoryCache.delete(ev.data);
+  };
+}
+
 const isFresh = (entry: { at: number }): boolean => Date.now() - entry.at < TTL_MS;
 
 const normalizeKey = (key: AdminSectionKey): string => key;
@@ -180,6 +198,16 @@ export function useSectionStrict(key: AdminSectionKey): UseSectionResult {
 export type { SectionKey };
 
 export const clearSectionCache = (key?: AdminSectionKey): void => {
-  if (key) memoryCache.delete(key);
-  else memoryCache.clear();
+  if (key) {
+    memoryCache.delete(key);
+    // Notify sibling tabs so they drop the same key and refetch on next
+    // access instead of serving stale content for up to TTL_MS.
+    channel?.postMessage(key);
+  } else {
+    memoryCache.clear();
+    // No per-key message to broadcast for a full clear; sibling tabs will
+    // just have to age their entries out (still bounded by TTL_MS). Full
+    // clears are app-lifecycle-only and rarely cross paths with live
+    // previews in another tab.
+  }
 };
