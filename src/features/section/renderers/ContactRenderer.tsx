@@ -15,6 +15,7 @@ import { motionPresets } from '@/design-system/motion';
 import { cn } from '@/lib/utils';
 import { ChevronRight, Mail, Phone, Download } from 'lucide-react';
 import { SOCIAL_ICON } from './linkIcons';
+import { ContactForm } from './ContactForm';
 
 type ContactRendererProps = {
   data: Record<string, unknown>;
@@ -246,6 +247,13 @@ export function ContactRenderer({ data, className }: ContactRendererProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Contact form — spans both columns. POSTs to /api/contact which
+          delivers the message via Gmail SMTP to the site owner's inbox
+          with replyTo set to the visitor's email. */}
+      <div className="md:col-span-2">
+        <ContactForm />
+      </div>
     </motion.div>
   );
 }
