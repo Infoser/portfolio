@@ -59,6 +59,12 @@ export function DebugTerminal() {
   const sequenceRef = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Holds the timeout scheduled by the `exit` command (which closes the
+  // dialog after a short beat for the goodbye line to render). Tracked in a
+  // ref so the unmount effect can clear it — the previous `setTimeout` was
+  // never cleared, risking a setState-on-unmounted warning if the dialog
+  // unmounted inside the 220ms gap.
+  const exitTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -101,6 +107,17 @@ export function DebugTerminal() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [lines]);
 
+  // Clear any pending exit-timeout on unmount so we never call setOpen
+  // against an unmounted component if the dialog is dismissed mid-beat.
+  useEffect(() => {
+    return () => {
+      if (exitTimeoutRef.current != null) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   if (!enabled) return null;
 
   const pushLines = (newLines: Array<Omit<Line, 'id'>>) =>
@@ -117,7 +134,13 @@ export function DebugTerminal() {
     const lower = cmd.toLowerCase();
     if (lower === 'exit') {
       pushLines([{ text: 'goodbye. the cursor blinks for you.', tone: 'muted' }]);
-      setTimeout(() => setOpen(false), 220);
+      // Replace any pending timeout (defensive) and track the id so the
+      // unmount effect can clear it.
+      if (exitTimeoutRef.current != null) clearTimeout(exitTimeoutRef.current);
+      exitTimeoutRef.current = window.setTimeout(() => {
+        exitTimeoutRef.current = null;
+        setOpen(false);
+      }, 220);
       return;
     }
     if (lower === 'help') {

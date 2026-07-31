@@ -2,10 +2,10 @@ import { useTabsStore } from '@/store/tabs';
 import { SECTIONS_MANIFEST } from '@/config/sections-manifest';
 import { cn } from '@/lib/utils';
 
-const DOTS: Array<{ color: string; label: string }> = [
-  { color: '#ff5f57', label: 'Close' },
-  { color: '#febc2e', label: 'Minimize' },
-  { color: '#28c840', label: 'Zoom' },
+const DOTS: Array<{ color: string }> = [
+  { color: '#ff5f57' },
+  { color: '#febc2e' },
+  { color: '#28c840' },
 ];
 
 type TitleBarProps = {
@@ -22,26 +22,31 @@ export function TitleBar({ onOpenMenu }: TitleBarProps) {
       role="banner"
       className="flex h-9 shrink-0 items-center justify-between border-b border-border bg-surface pl-3 pr-3 select-none [user-select:none]"
     >
-      {/* Left: macOS traffic lights */}
-      <div className="flex items-center gap-2" data-tauri-drag-region>
-        {DOTS.map(({ color, label }) => (
+      {/* Left: macOS traffic lights. The three dots are decorative chrome —
+          they don't actually close/minimize/zoom anything. All three open
+          the mobile Browse drawer (onOpenMenu). Previously each had a
+          misleading aria-label/title of "Close","Minimize","Zoom", which
+          lied to assistive tech. The wrapper now carries a single accurate
+          label; the individual buttons are aria-hidden and unlabelled. */}
+      <div
+        className="flex items-center gap-2"
+        data-tauri-drag-region
+        role="group"
+        aria-label="Browse sections (opens the file-tree drawer)"
+      >
+        {DOTS.map(({ color }, idx) => (
           <button
-            key={label}
+            key={idx}
             type="button"
-            aria-label={label}
-            title={label}
+            aria-hidden="true"
+            tabIndex={-1}
             className={cn(
               'flex size-3 items-center justify-center rounded-full',
               'transition-opacity hover:opacity-90',
             )}
             style={{ backgroundColor: color }}
             onClick={onOpenMenu}
-            tabIndex={-1}
-          >
-            <span className="opacity-0 text-[8px] leading-none text-black/70 group-hover:opacity-100">
-              ×
-            </span>
-          </button>
+          />
         ))}
       </div>
 

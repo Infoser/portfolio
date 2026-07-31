@@ -1,10 +1,12 @@
 import { FileQuestion } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
-type NotFoundRouteProps = {
-  path?: string;
-};
+export function NotFoundRoute() {
+  // Previously App.tsx mounted this without passing the unmatched path, so
+  // the friendlier per-path branch never fired. Reading the location here
+  // surfaces the actual URL the visitor landed on.
+  const { pathname } = useLocation();
 
-export function NotFoundRoute({ path }: NotFoundRouteProps) {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-background p-6 text-center text-foreground">
       <FileQuestion className="size-12 text-primary" aria-hidden="true" />
@@ -16,9 +18,7 @@ export function NotFoundRoute({ path }: NotFoundRouteProps) {
           This file isn't in the workspace
         </h1>
         <p className="text-sm text-muted-foreground">
-          {path
-            ? `The page ${path} doesn't exist here.`
-            : 'The page you tried to open doesn\'t exist as a file.'}{' '}
+          The page <code className="font-mono text-primary">{pathname}</code> doesn't exist here.
           If you got here from an old link, that file may have been removed or renamed.
         </p>
         <p className="text-sm text-muted-foreground">

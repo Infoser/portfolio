@@ -3,8 +3,13 @@ import { Bug } from 'lucide-react';
 import { useEasterEggStore } from '@/store/easter-eggs';
 import { isFeatureEnabled } from '@/config/features';
 
-const ACCUMULATOR_CAP_MS = 2000;
-const ACTIVATION_THRESHOLD_MS = 1200;
+// Accumulator thresholds are measured in pointer-movement pixel-units summed
+// across pointermove events (`Math.abs(movementX) + Math.abs(movementY)`), NOT
+// in milliseconds despite the original `_MS` suffix — that naming was a
+// code-clarity hazard that made the values look time-based. Renamed to
+// `_UNITS` to reflect what they actually compare against.
+const ACCUMULATOR_CAP_UNITS = 2000;
+const ACTIVATION_THRESHOLD_UNITS = 1200;
 
 export function BugCounter() {
   const enabled = isFeatureEnabled('bugCounter');
@@ -27,8 +32,8 @@ export function BugCounter() {
       const delta = now - lastTickRef.current;
       lastTickRef.current = now;
 
-      accumulatorRef.current = Math.min(accumulatorRef.current, ACCUMULATOR_CAP_MS * 10);
-      if (accumulatorRef.current >= ACTIVATION_THRESHOLD_MS) {
+      accumulatorRef.current = Math.min(accumulatorRef.current, ACCUMULATOR_CAP_UNITS * 10);
+      if (accumulatorRef.current >= ACTIVATION_THRESHOLD_UNITS) {
         accumulatorRef.current = 0;
         incrementBugs();
       } else {

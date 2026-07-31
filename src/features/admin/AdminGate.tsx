@@ -66,7 +66,7 @@ export function AdminGate() {
 
   if (booting) return null;
   if (unauthorized) return <NotFound />;
-  if (!authed) return <AdminLogin onSuccess={recheck} />;
+  if (!authed) return <AdminLogin onSuccess={recheck} skipBootSessionCheck />;
 
   return (
     <AdminShell

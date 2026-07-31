@@ -2,6 +2,7 @@ import { Menu } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/design-system';
 import { SiteBanner } from '@/features/site-banner';
+import { useFirstVisitToast } from '@/lib/hooks/useFirstVisitToast';
 import { ActivityBar } from './ActivityBar';
 import { Explorer } from './Explorer';
 import { TabStrip } from './TabStrip';
@@ -18,6 +19,10 @@ type EditorShellProps = {
 
 export function EditorShell({ renderSection, statusCenterSlot, statusRightSlot }: EditorShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // First-visit "Use the file tree" hint fires once per session. Previously
+  // this lived only in the dead routes/home.tsx Step 1 demo, so the live
+  // workspace never showed it despite WORKFLOW Step 2 requiring it.
+  useFirstVisitToast();
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden">

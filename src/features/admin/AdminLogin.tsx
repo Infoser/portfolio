@@ -6,16 +6,26 @@ import { Lock, AlertCircle } from 'lucide-react';
 
 type AdminLoginProps = {
   onSuccess: () => void;
+  /**
+   * When true, skip the boot-time `getAdminSession()` check AdminLogin does
+   * on mount. AdminGate already runs its own `recheck` against the same
+   * Supabase session before deciding whether to render AdminLogin, so the
+   * redundant fetch was costing up to two extra Supabase round-trips per
+   * admin boot. The flag is opt-in so AdminLogin stays usable standalone
+   * (e.g. if a future route mounts it without an upstream check).
+   */
+  skipBootSessionCheck?: boolean;
 };
 
-export function AdminLogin({ onSuccess }: AdminLoginProps) {
+export function AdminLogin({ onSuccess, skipBootSessionCheck }: AdminLoginProps) {
   const [email, setEmail] = useState('issuatstudy090@gmail.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [checkingSession, setCheckingSession] = useState(!skipBootSessionCheck);
 
   useEffect(() => {
+    if (skipBootSessionCheck) return;
     let cancelled = false;
     (async () => {
       if (!isSupabaseConfigured()) {
@@ -33,7 +43,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
     return () => {
       cancelled = true;
     };
-  }, [onSuccess]);
+  }, [onSuccess, skipBootSessionCheck]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
