@@ -11,6 +11,7 @@ import { useTabsStore } from '@/store/tabs';
 import { useSection } from '@/lib/hooks/useSection';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { BugCounter, DebugTerminal, SessionTracker } from '@/features/easter-eggs';
+import { PixelCursor } from '@/features/cursor';
 import Playground from '@/routes/playground';
 import { NotFoundRoute } from '@/routes/not-found';
 
@@ -85,6 +86,7 @@ function App() {
       <Helmet defaultTitle="Ishan Kumar Sahu — ML/DL researcher" titleTemplate="%s · portfolio" />
       <div className="relative z-10">
         <DebugTerminal />
+        <PixelCursor />
         <BrowserRouter>
           <Routes>
             <Route
