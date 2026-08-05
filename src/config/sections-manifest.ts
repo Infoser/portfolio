@@ -9,6 +9,7 @@ import {
   Users,
   Mail,
   Megaphone,
+  Type,
 } from 'lucide-react';
 
 export type SectionKey =
@@ -21,7 +22,7 @@ export type SectionKey =
   | 'leadership'
   | 'contact';
 
-export type SectionKind = 'markdown' | 'json' | 'toml' | 'structured-list' | 'banner';
+export type SectionKind = 'markdown' | 'json' | 'toml' | 'structured-list' | 'banner' | 'about_roles';
 
 export type FolderKey = 'projects' | 'experience' | 'achievements' | 'education' | 'leadership';
 
@@ -30,7 +31,7 @@ export type FolderKey = 'projects' | 'experience' | 'achievements' | 'education'
  * are NOT shown in the public section explorer. Rendered as the same kind of
  * row in the admin nav, and dispatched to a dedicated editor.
  */
-export type MetaKey = 'site_banner';
+export type MetaKey = 'site_banner' | 'about_roles';
 
 export type AdminSectionKey = SectionKey | MetaKey;
 
@@ -144,6 +145,14 @@ export const META_MANIFEST: Record<MetaKey, ManifestEntry> = {
     icon: Megaphone,
     isFolder: false,
     kind: 'banner',
+  },
+  about_roles: {
+    key: 'about_roles',
+    label: 'About Roles',
+    extension: 'json',
+    icon: Type,
+    isFolder: false,
+    kind: 'about_roles',
   },
 };
 

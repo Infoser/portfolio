@@ -11,6 +11,7 @@ import { StructuredListEditor } from './editors/StructuredListEditor';
 import { JsonEditor } from './editors/JsonEditor';
 import { TomlEditor } from './editors/TomlEditor';
 import { BannerEditor } from './editors/BannerEditor';
+import { AboutRolesEditor } from './editors/AboutRolesEditor';
 import { SectionRenderer } from '@/features/section';
 import { useSection } from '@/lib/hooks/useSection';
 import { updateSectionContent } from '@/lib/auth';
@@ -149,6 +150,15 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
               }
             />
           )}
+          {content.kind === 'about_roles' && (
+            <AboutRolesEditor
+              initialEnabled={content.enabled}
+              initialRoles={content.roles}
+              onChange={({ enabled, roles }) =>
+                handleChange({ kind: 'about_roles', enabled, roles })
+              }
+            />
+          )}
         </div>
 
         <details className="overflow-hidden rounded-md border border-border bg-surface">
@@ -158,6 +168,8 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
           <div className="border-t border-border bg-background p-4">
             {content.kind === 'banner' ? (
               <BannerPreview enabled={content.enabled} message={content.message} />
+            ) : content.kind === 'about_roles' ? (
+              <AboutRolesPreview enabled={content.enabled} roles={content.roles} />
             ) : (
               <SectionRenderer
                 sectionKey={sectionKey as Exclude<AdminSectionKey, MetaKey>}
@@ -186,6 +198,27 @@ const BannerPreview = ({ enabled, message }: { enabled: boolean; message: string
       </span>
       <span className="truncate">{message}</span>
     </div>
+  );
+};
+
+const AboutRolesPreview = ({ enabled, roles }: { enabled: boolean; roles: string[] }) => {
+  if (!enabled || !roles.some((r) => r.trim())) {
+    return (
+      <p className="font-mono text-xs text-muted-foreground">
+        Typewriter is currently hidden on the public About page.
+      </p>
+    );
+  }
+  return (
+    <p className="font-display text-2xl font-medium tracking-tight">
+      <span className="text-foreground">I am </span>
+      <span className="text-primary">{roles.find((r) => r.trim())}</span>
+      <span
+        aria-hidden="true"
+        className="ml-0.5 inline-block w-[2px] bg-primary"
+        style={{ height: '1.1em' }}
+      />
+    </p>
   );
 };
 

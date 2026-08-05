@@ -9,6 +9,7 @@ import { skillsContent } from './skills';
 import { contactContent } from './contact';
 import { projectsContent } from './projects';
 import { siteBannerContent } from './site-banner';
+import { aboutRolesContent } from './about-roles';
 
 const STATIC_SECTIONS: Partial<Record<AdminSectionKey, SectionContent>> = {
   about: aboutContent,
@@ -20,6 +21,7 @@ const STATIC_SECTIONS: Partial<Record<AdminSectionKey, SectionContent>> = {
   skills: skillsContent,
   contact: contactContent,
   site_banner: siteBannerContent,
+  about_roles: aboutRolesContent,
 };
 
 export const getStaticSectionContent = (key: AdminSectionKey): SectionContent | undefined =>

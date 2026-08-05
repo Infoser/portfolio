@@ -6,6 +6,7 @@ import { ErrorBoundary } from '@/design-system/ErrorBoundary';
 import { EditorShell } from '@/features/editor-shell';
 import { ProfileImage } from '@/features/profile-image';
 import { SectionRenderer } from '@/features/section';
+import { RoleTypewriter } from '@/features/section/RoleTypewriter';
 import { SECTIONS_MANIFEST, type SectionKey } from '@/config/sections-manifest';
 import { useTabsStore } from '@/store/tabs';
 import { useSection } from '@/lib/hooks/useSection';
@@ -52,6 +53,8 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
           </p>
           <h2 className="font-display text-3xl font-medium tracking-tight">{entry.label}</h2>
         </header>
+
+        {isAbout && <RoleTypewriter />}
 
         {content ? (
           <SectionRenderer sectionKey={sectionKey} content={content} />

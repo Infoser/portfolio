@@ -40,12 +40,19 @@ export type BannerContent = {
   message: string;
 };
 
+export type AboutRolesContent = {
+  kind: 'about_roles';
+  enabled: boolean;
+  roles: string[];
+};
+
 export type SectionContent =
   | MarkdownContent
   | JsonContent
   | TomlContent
   | StructuredListContent
-  | BannerContent;
+  | BannerContent
+  | AboutRolesContent;
 
 export type SectionContentTypeMap = {
   markdown: MarkdownContent;
@@ -53,6 +60,7 @@ export type SectionContentTypeMap = {
   toml: TomlContent;
   'structured-list': StructuredListContent;
   banner: BannerContent;
+  about_roles: AboutRolesContent;
 };
 
 export type SectionContentFor<K extends SectionKind> = K extends keyof SectionContentTypeMap
