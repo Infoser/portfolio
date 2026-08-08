@@ -39,7 +39,7 @@ export function EditorArea({ children, placeholder }: EditorAreaProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="flex h-full min-h-0 overflow-y-auto"
+            className="flex h-full min-h-0 overflow-y-auto scroll-smooth"
           >
             <Gutter />
             <div className="flex-1 min-w-0 px-4 py-4 md:px-6 md:py-6">

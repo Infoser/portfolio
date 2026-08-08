@@ -1,4 +1,5 @@
 import type { ComponentType, MouseEvent } from 'react';
+import { animate } from 'animejs';
 import { SECTIONS_MANIFEST, type SectionKey } from '@/config/sections-manifest';
 import type { StructuredListContent } from '@/types/sections';
 import { useSection } from '@/lib/hooks/useSection';
@@ -51,11 +52,81 @@ function OutlineRailInner({ activeTab }: InnerProps) {
     rows = [{ id: entry.label, label: entry.label, sublabel: `.${entry.extension}` }];
   }
 
+  // Tracks in-flight animations so consecutive outline clicks cancel the
+  // previous ones rather than stacking/conflicting. The anime.js
+  // `Animation` instances expose `.pause()` for this; we keep the latest
+  // scroll + highlight ones here.
+  let scrollAnim: { pause: () => void } | null = null;
+  let highlightAnim: { pause: () => void } | null = null;
+
   const handleJump = (id: string) => (ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
     const target = document.getElementById(id);
     if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Find the scroll container — the parent `.overflow-y-auto` motion.div
+    // in EditorArea. Walk up from the rail until we find an element with
+    // overflow. (Done at click-time rather than via a ref because the
+    // container can change identity across framer-motion remounts.)
+    let container: HTMLElement | null = target.parentElement;
+    while (container && getComputedStyle(container).overflowY !== 'auto') {
+      container = container.parentElement;
+    }
+    if (!container) return;
+
+    // Target's offset within the scroll container = how far down we need
+    // to scroll to bring it to the top of the viewport (with a small
+    // top-padding so the heading isn't flush against the edge).
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const SCROLL_PADDING = 16;
+    const targetTop =
+      container.scrollTop + (targetRect.top - containerRect.top) - SCROLL_PADDING;
+
+    // Note: we deliberately do NOT honour prefers-reduced-motion here.
+    // Unlike the custom cursor (which is pure decoration), the outline
+    // jump is functional navigation — the user clicked a link to get to
+    // a specific entry, and a smooth scroll helps them track where they
+    // ended up. Snap-jumping is disorienting regardless of motion
+    // preference. The 600ms ease-out is short and informative, not
+    // decorative.
+
+    // Cancel any in-flight scroll + highlight, then start new ones.
+    if (scrollAnim) scrollAnim.pause();
+    if (highlightAnim) {
+      highlightAnim.pause();
+      // Inline opacity set by the prior highlight may be mid-flight at a
+      // non-1 value; revert so the next target starts from full opacity.
+      (target as HTMLElement).style.opacity = '';
+    }
+    // Scroll: anime.js animates the container's `scrollTop` directly —
+    // bypassing the browser's native smooth-scroll entirely, so the feel
+    // is identical across browsers and doesn't get swallowed by
+    // framer-motion's entry transform race.
+    scrollAnim = animate(container, {
+      scrollTop: targetTop,
+      duration: 600,
+      ease: 'outCubic',
+      autoplay: true,
+      onComplete: () => {
+        scrollAnim = null;
+        // Fade-out then fade-in pulse on the target card — draws the eye
+        // to the destination once the rolling scroll settles. Keyframes
+        // [1 → 0.35 → 1] over ~520ms with an ease-in-out curve.
+        highlightAnim = animate(target, {
+          opacity: [1, 0.35, 1],
+          duration: 520,
+          ease: 'inOutQuad',
+          autoplay: true,
+          onComplete: () => {
+            // Leave no inline style residue — framer-motion owns opacity
+            // for the initial reveal; our pulse must not override it.
+            (target as HTMLElement).style.opacity = '';
+            highlightAnim = null;
+          },
+        }) as unknown as { pause: () => void };
+      },
+    }) as unknown as { pause: () => void };
   };
 
   return (
