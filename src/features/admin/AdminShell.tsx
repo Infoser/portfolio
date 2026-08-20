@@ -9,6 +9,7 @@ import {
 import { MarkdownEditor } from './editors/MarkdownEditor';
 import { StructuredListEditor } from './editors/StructuredListEditor';
 import { JsonEditor } from './editors/JsonEditor';
+import { SkillsEditor } from './editors/SkillsEditor';
 import { TomlEditor } from './editors/TomlEditor';
 import { BannerEditor } from './editors/BannerEditor';
 import { AboutRolesEditor } from './editors/AboutRolesEditor';
@@ -127,7 +128,14 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
               onChange={(entries) => handleChange({ kind: 'structured-list', entries })}
             />
           )}
-          {content.kind === 'json' && (
+          {content.kind === 'json' && sectionKey === 'skills' && (
+            <SkillsEditor
+              initialData={content.data}
+              onChange={(data) => handleChange({ kind: 'json', data })}
+              onParseError={setParseError}
+            />
+          )}
+          {content.kind === 'json' && sectionKey !== 'skills' && (
             <JsonEditor
               initialData={content.data}
               onChange={(data) => handleChange({ kind: 'json', data })}
