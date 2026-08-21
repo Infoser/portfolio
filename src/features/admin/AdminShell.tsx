@@ -319,7 +319,7 @@ export function AdminShell({ onSignOut }: AdminShellProps) {
             })}
           </ul>
         </nav>
-        <main className="min-w-0 flex-1 p-6">
+        <main className="min-w-0 min-h-0 flex-1 p-6">
           {/* key forces a clean remount on section switch so editor state never
               bleeds between sections. */}
           <SectionEditor key={active} sectionKey={active} />
