@@ -137,6 +137,7 @@ const EntryCard = ({ entry, index, count, sectionKey, onUpdate, onMove, onRemove
         value={entry.imageUrl ?? ''}
         onChange={(url) => onUpdate(index, { imageUrl: url })}
         sectionKey={sectionKey}
+        idSuffix={entry.id}
       />
     </Reorder.Item>
   );

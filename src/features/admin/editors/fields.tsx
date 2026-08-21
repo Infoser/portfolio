@@ -58,9 +58,12 @@ type ImageFieldProps = {
   value: string;
   onChange: (url: string) => void;
   sectionKey: string;
+  /** Optional suffix to make the file input ID unique when multiple
+   * ImageFields share the same label (e.g. multiple entries in a list). */
+  idSuffix?: string;
 };
 
-export function ImageField({ label, value, onChange, sectionKey }: ImageFieldProps) {
+export function ImageField({ label, value, onChange, sectionKey, idSuffix }: ImageFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +81,8 @@ export function ImageField({ label, value, onChange, sectionKey }: ImageFieldPro
       setBusy(false);
     }
   };
+
+  const fileInputId = `file-${label.replace(/\s+/g, '-').toLowerCase()}${idSuffix ? `-${idSuffix}` : ''}`;
 
   return (
     <label className="flex flex-col gap-1.5">
@@ -101,11 +106,11 @@ export function ImageField({ label, value, onChange, sectionKey }: ImageFieldPro
           accept="image/png,image/jpeg,image/webp,image/gif"
           onChange={(e) => onPick(e.target.files?.[0])}
           className="sr-only"
-          id={`file-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          id={fileInputId}
           aria-label={`${label} upload`}
         />
         <label
-          htmlFor={`file-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          htmlFor={fileInputId}
           className={cn(
             'inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-3 py-2 font-mono text-xs',
             'hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring',
