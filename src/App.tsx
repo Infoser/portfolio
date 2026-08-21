@@ -26,6 +26,40 @@ const SectionView = ({ sectionKey }: { sectionKey: SectionKey }) => {
   const pageTitle = `${entry.label} — Ishan Kumar Sahu`;
   const isAbout = sectionKey === 'about';
 
+  // Skeleton for the section content while live data loads.
+  // Prevents "demo → live" flash by not rendering static content until
+  // the Supabase fetch completes (or fails).
+  if (isLoading) {
+    return (
+      <article className={isAbout ? 'flex max-w-3xl flex-col gap-6 md:max-w-4xl md:flex-row md:items-start md:gap-8' : 'flex max-w-3xl flex-col gap-6'}>
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content={`${entry.label} — section of Ishan Kumar Sahu's portfolio.`} />
+        </Helmet>
+        <div className={isAbout ? 'min-w-0 flex-1 md:order-1' : 'contents'}>
+          <header className="flex flex-col gap-1">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              {entry.label.toLowerCase()}.{entry.extension}
+              <span className="ml-2 normal-case tracking-normal text-muted-foreground/70">· loading live</span>
+            </p>
+            <h2 className="font-display text-3xl font-medium tracking-tight">{entry.label}</h2>
+          </header>
+          {isAbout && <RoleTypewriter />}
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 rounded-md bg-muted" />
+            ))}
+          </div>
+        </div>
+        {isAbout && (
+          <div className="mb-2 flex justify-center md:order-2 md:mb-0 md:justify-start">
+            <ProfileImage src="/profile.png" alt="Ishan Kumar Sahu" />
+          </div>
+        )}
+      </article>
+    );
+  }
+
   return (
     <article
       className={
