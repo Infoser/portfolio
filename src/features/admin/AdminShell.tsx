@@ -255,7 +255,7 @@ export function AdminShell({ onSignOut }: AdminShellProps) {
       <div className="flex min-h-0 flex-1">
         <nav
           aria-label="Admin section list"
-          className="w-56 shrink-0 overflow-y-auto border-r border-border bg-surface py-3"
+          className="w-56 shrink-0 border-r border-border bg-surface py-3"
         >
           <p className="px-3 pb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             Sections
