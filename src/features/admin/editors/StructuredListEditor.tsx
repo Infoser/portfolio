@@ -197,7 +197,7 @@ export function StructuredListEditor({
       axis="y"
       values={entries.map((e) => e.id)}
       onReorder={handleReorder}
-      className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto"
+      className="flex h-full min-h-0 flex-col gap-4"
     >
       {entries.map((entry, idx) => (
         <EntryCard
