@@ -19,6 +19,7 @@ import { updateSectionContent } from '@/lib/auth';
 import { clearSectionCache } from '@/lib/hooks/useSection';
 import { Button } from '@/design-system';
 import { cn } from '@/lib/utils';
+import { TextField } from './editors/fields';
 import { SaveIcon, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -148,6 +149,24 @@ const SectionEditor = ({ sectionKey }: { sectionKey: AdminSectionKey }) => {
               onChange={(data) => handleChange({ kind: 'toml', data })}
               onParseError={setParseError}
             />
+          )}
+          {content.kind === 'toml' && sectionKey === 'contact' && (
+            <div className="grid h-full min-h-0 grid-rows-[1fr_auto] gap-4">
+              <div className="min-h-0 overflow-hidden">
+{/* CV URL input for contact section */}
+                <TextField
+                  label="CV URL"
+                  value={content.data?.cv as string ?? ''}
+                  onChange={(v) => handleChange({ kind: 'toml', data: { ...content.data, cv: v } })}
+                  optional
+                />
+              </div>
+              <TomlEditor
+                initialData={content.data}
+                onChange={(data) => handleChange({ kind: 'toml', data })}
+                onParseError={setParseError}
+              />
+            </div>
           )}
           {content.kind === 'banner' && (
             <BannerEditor
